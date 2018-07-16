@@ -102,6 +102,10 @@ public class AnnotationDesugar {
                     String key = typeDef.name.value + DOT + field.name.value;
                     generateAnnotations(field, key, initFunction, annotationMap);
                 }
+                for (BLangFunction function : objectTypeNode.functions) {
+                    String key = typeDef.name.value + DOT + function.name.value;
+                    generateAnnotations(function, key, initFunction, annotationMap);
+                }
             } else if (typeDef.symbol.type.tag == TypeTags.RECORD) {
                 BLangRecordTypeNode recordTypeNode = (BLangRecordTypeNode) typeDef.typeNode;
                 for (BLangVariable field : recordTypeNode.fields) {
