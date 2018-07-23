@@ -755,6 +755,27 @@
                 <type>zip</type>
                 <classifier>ballerina-binary-repo</classifier>
             </dependency>
+
+            <!-- ballerina-cmd -->
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-cmd</artifactId>
+                <version>${ballerina.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-cmd</artifactId>
+                <version>${ballerina.version}</version>
+                <type>zip</type>
+                <classifier>ballerina-sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-cmd</artifactId>
+                <version>${ballerina.version}</version>
+                <type>zip</type>
+                <classifier>ballerina-binary-repo</classifier>
+            </dependency>
             <!-- End STD lib dependencies -->
 
             <dependency>
@@ -1607,6 +1628,7 @@
                 <module>stdlib/database/mysql</module>
                 <module>stdlib/database/sql</module>
                 <module>stdlib/streams</module>
+                <module>stdlib/cmd</module>
 
                 <module>misc/lib-creator</module>
 
@@ -1686,6 +1708,7 @@
                 <module>stdlib/database/mysql</module>
                 <module>stdlib/database/sql</module>
                 <module>stdlib/streams</module>
+                <module>stdlib/cmd</module>
 
                 <module>misc/lib-creator</module>
 
@@ -1762,6 +1785,7 @@
                 <module>stdlib/database/mysql</module>
                 <module>stdlib/database/sql</module>
                 <module>stdlib/streams</module>
+                <module>stdlib/cmd</module>
 
                 <module>misc/lib-creator</module>
 

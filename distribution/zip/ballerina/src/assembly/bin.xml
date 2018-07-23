@@ -124,6 +124,7 @@
                 <include>org.ballerinalang:ballerina-time:jar</include>
                 <include>org.ballerinalang:ballerina-transactions:jar</include>
                 <include>org.ballerinalang:ballerina-websub:jar</include>
+                <include>org.ballerinalang:ballerina-cmd:jar</include>
 
                 <include>org.ballerinalang:ballerina-core:jar</include>
                 <include>org.ballerinalang:ballerina-lang:jar</include>

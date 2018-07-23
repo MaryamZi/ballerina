@@ -43,6 +43,7 @@ import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BXMLNSSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.SymTag;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.Symbols;
+import org.wso2.ballerinalang.compiler.semantics.model.types.BAnyType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BArrayType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BEnumType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BField;
@@ -1656,8 +1657,8 @@ public class TypeChecker extends BLangNodeVisitor {
     }
 
     private BType checkIndexExprForStructFieldAccess(BLangExpression indexExpr) {
-        if (indexExpr.getKind() != NodeKind.LITERAL) {
-            dlog.error(indexExpr.pos, DiagnosticCode.INVALID_INDEX_EXPR_STRUCT_FIELD_ACCESS);
+        if (indexExpr.getKind() != NodeKind.LITERAL && indexExpr.getKind() != NodeKind.SIMPLE_VARIABLE_REF) {
+            dlog.error(indexExpr.pos, DiagnosticCode.INVALID_INDEX_EXPR_STRUCT_FIELD_ACCESS); //todo:fix
             return symTable.errType;
         }
 
@@ -1984,8 +1985,13 @@ public class TypeChecker extends BLangNodeVisitor {
             case TypeTags.RECORD:
                 indexExprType = checkIndexExprForStructFieldAccess(indexExpr);
                 if (indexExprType.tag == TypeTags.STRING) {
-                    String fieldName = (String) ((BLangLiteral) indexExpr).value;
-                    actualType = checkStructFieldAccess(indexBasedAccessExpr, names.fromString(fieldName), varRefType);
+                    if (indexExpr.getKind() == NodeKind.SIMPLE_VARIABLE_REF) {
+                        actualType = new BAnyType(TypeTags.ANY, null);
+                    } else {
+                        String fieldName = (String) ((BLangLiteral) indexExpr).value;
+                        actualType = checkStructFieldAccess(indexBasedAccessExpr, names.fromString(fieldName),
+                                                            varRefType);
+                    }
                 }
                 break;
             case TypeTags.MAP:

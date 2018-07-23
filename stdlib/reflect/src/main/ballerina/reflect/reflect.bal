@@ -33,6 +33,24 @@ public type annotationData record {
     anyStruct value,
 };
 
+public type AnnotatedFieldInfo record {
+    FieldInfo fieldInfo,
+    annotationData annotData,
+};
+
+// TODO: make meaningful for updates
+public type FieldInfo object {
+    public string identifier;
+    public typedesc fieldType;
+    public boolean isOptional;
+
+    new(fieldType) {
+
+    }
+
+    public native function setValue(any instance, any value);
+};
+
 public native function getServiceAnnotations(typedesc serviceType) returns (annotationData[]);
 
 public native function getResourceAnnotations(typedesc serviceType, string resourceName) returns (annotationData[]);
@@ -42,3 +60,5 @@ public native function getStructAnnotations(typedesc structType) returns (annota
 public native function getStructFieldAnnotations(typedesc structType, string fieldName) returns (annotationData[]);
 
 public native function getFunctionAnnotations(any functionPointer) returns (annotationData[]);
+
+public native function getAnnotatedFieldInfo(any annotatedObject, typedesc annotationDesc) returns AnnotatedFieldInfo[];

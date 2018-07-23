@@ -36,8 +36,10 @@ import org.ballerinalang.util.codegen.StructureTypeInfo;
 abstract class AbstractAnnotationReader extends BlockingNativeCallableUnit {
 
     private static final String PKG_INTERNAL = "ballerina/internal";
-    private static final String PKG_REFELCT = "ballerina/reflect";
+    protected static final String PKG_REFLECT = "ballerina/reflect";
     private static final String STRUCT_ANNOTATION = "annotationData";
+    protected static final String FIELD_INFO = "FieldInfo";
+    protected static final String ANNOTATED_FIELD_INFO = "AnnotatedFieldInfo";
     static final String DOT = ".";
 
     BValue getAnnotationValue(Context context, String pkgPath, String key) {
@@ -45,26 +47,32 @@ abstract class AbstractAnnotationReader extends BlockingNativeCallableUnit {
         return createAnnotationStructArray(context, bMap.get(key));
     }
 
-    private BRefValueArray createAnnotationStructArray(Context context, BValue map) {
+    protected BRefValueArray createAnnotationStructArray(Context context, BValue map) {
         if (map == null || map.getType().getTag() != BTypes.typeMap.getTag()) {
             return null;
         }
-        final PackageInfo packageInfo = context.getProgramFile().getPackageInfo(PKG_REFELCT);
+        final PackageInfo packageInfo = context.getProgramFile().getPackageInfo(PKG_REFLECT);
         final StructureTypeInfo structInfo = packageInfo.getStructInfo(STRUCT_ANNOTATION);
         BRefValueArray annotationArray = new BRefValueArray(structInfo.getType());
         BMap<String, BValue> annotationMap = (BMap<String, BValue>) map;
         long index = 0;
         for (String key : annotationMap.keySet()) {
-            final String annotationQName = key.split("\\$")[0];
-            final String annotationName = annotationQName.substring(annotationQName.lastIndexOf(":") + 1);
-            final String pkgQName = annotationQName.substring(0, annotationQName.lastIndexOf(":"));
-            final String[] pkgQNameParts = pkgQName.split(":");
-            final String pkgVersion = pkgQNameParts.length > 1 ? pkgQNameParts[1] : "";
-            final BMap<String, BValue> annotation =
-                    BLangVMStructs.createBStruct(structInfo, annotationName, pkgQNameParts[0], pkgVersion,
-                            annotationMap.get(key));
-            annotationArray.add(index++, annotation);
+            annotationArray.add(index++, createAnnotationDataRecord(context, key,
+                                                                    (BMap<String, BValue>) annotationMap.get(key)));
         }
         return annotationArray;
+    }
+
+    protected BMap<String, BValue> createAnnotationDataRecord(Context context, String key,
+                                                              BMap<String, BValue> annotationValue) {
+        PackageInfo packageInfo = context.getProgramFile().getPackageInfo(PKG_REFLECT);
+        StructureTypeInfo structInfo = packageInfo.getStructInfo(STRUCT_ANNOTATION);
+
+        String annotationQName = key.split("\\$")[0];
+        String annotationName = annotationQName.substring(annotationQName.lastIndexOf(":") + 1);
+        String pkgQName = annotationQName.substring(0, annotationQName.lastIndexOf(":"));
+        String[] pkgQNameParts = pkgQName.split(":");
+        String pkgVersion = pkgQNameParts.length > 1 ? pkgQNameParts[1] : "";
+        return BLangVMStructs.createBStruct(structInfo, annotationName, pkgQNameParts[0], pkgVersion, annotationValue);
     }
 }
