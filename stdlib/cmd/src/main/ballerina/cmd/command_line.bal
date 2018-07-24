@@ -37,11 +37,11 @@ public type CommandLine object {
         // parse args
         // 1) identify the command - if first arg is not a command throw an error (unknown command), default to the
         //      default command if no args specified (i.e., ballerina)
-        // 2) look up expected options, dynamic options and params and create a map with the values, if conditions are
-        //      not satisfied (required options/params not specified, cannot parse positional params to expected type,
-        //      etc.)
-        // 3) invoke the execute command for the particular command, passing the created map of args, and upon
-        //      completion if there is a return value return it, or return
+        // 2) identify expected options, dynamic options and params and assign values, OR throw an error if conditions
+        //      are not satisfied (required options/params not specified, cannot parse positional params to the expected
+        //      type, etc.)
+        // 3) invoke the execute command for the particular command and upon completion if there is a return value
+        //      return it, or return
         if (lengthof args == 0) {
             // print usage
             BaseCommand defaultCmdToExec = check <BaseCommand> defCommand;
@@ -74,7 +74,7 @@ public type CommandLine object {
                 while (index < argCount) {
                     string nextArg = args[index];
                     if (optionUniqueIdMap.hasKey(nextArg)) {
-                        string uniqueId = optionUniqueIdMap[nextArg] but { () => "" };
+                        string uniqueId = optionUniqueIdMap[nextArg] but { () => "" }; // cannot be () here
                         if (cmdOptionMap.hasKey(uniqueId)) {
                             match (cmdOptionMap[uniqueId]) {
                                 CommandOption cmdOption => {
@@ -132,7 +132,7 @@ public type CommandLine object {
                             match (cmdParamMap[ALL_REMAINING_ARGS_PARAM_KEY]) {
                                 CommandPositionalParam remParam => {
                                     any remParamFieldVal = check remParam.fieldInfo.getValue(commandObject);
-                                    // only supports a string array, todo:support all
+                                    // only supports a string array, TODO:support all basic type arrays
                                     match(remParamFieldVal) {
                                         string[] =>
                                             check remParam.fieldInfo.setValue(commandObject, remainingPositionalArray);
@@ -312,7 +312,7 @@ function addMapEntry(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
         }
         map<any> anyMap => {
             validateArity();
-            anyMap[keyValueEntry[0]] = keyValueEntry[1]; //add as string for any constrained todo: revisit!
+            anyMap[keyValueEntry[0]] = keyValueEntry[1]; //add as string for any constrained TODO: revisit!
         }
         any => {
             error unsupportedType = { message: "unsupported CLI dynamic option type for field: "
@@ -338,7 +338,7 @@ function processOptions(any commandObject, map<string> requiredOptions, map<stri
         string[] optionNames = fieldOptionConfig.names;
 
         if (lengthof optionNames == 0) {
-            // Ideally shouldn't reach here --> CompilerPlugin?
+            // Ideally shouldn't reach here --> needs to be validated early on
             error unnamedOptionError = { message: "option cannot be specified without a name" };
             throw unnamedOptionError;
         }
@@ -384,7 +384,7 @@ function processDynamicOptions(any commandObject, map<string> requiredOptions, m
         string[] optionNames = fieldOptionConfig.names;
 
         if (lengthof optionNames == 0) {
-            // Ideally shouldn't reach here --> CompilerPlugin?
+            // Ideally shouldn't reach here --> needs to be validated early on
             error unnamedOptionError = { message: "dynamic option cannot be specified without a name" };
             throw unnamedOptionError;
         }

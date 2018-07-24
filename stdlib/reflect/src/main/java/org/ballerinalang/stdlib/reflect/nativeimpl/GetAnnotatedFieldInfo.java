@@ -44,7 +44,7 @@ import static org.ballerinalang.stdlib.reflect.ReflectConstants.FIELD_INFO;
 import static org.ballerinalang.stdlib.reflect.ReflectConstants.PKG_REFLECT;
 
 /**
- * Get Function's Annotations.
+ * Retrieve information regarding object fields that have a specific annotation.
  *
  * @since 0.981.0
  */

@@ -33,7 +33,7 @@ import static org.ballerinalang.stdlib.reflect.ReflectConstants.FIELD_INFO_IDENT
 import static org.ballerinalang.stdlib.reflect.ReflectConstants.FIELD_INFO_OBJECT_TYPE;
 
 /**
- * Get Function's Annotations.
+ * Retrieve the value for the field in the specified instance of the object.
  *
  * @since 0.981.0
  */
