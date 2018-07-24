@@ -38,17 +38,20 @@ public type AnnotatedFieldInfo record {
     annotationData annotData,
 };
 
-// TODO: make meaningful for updates
+// TODO: refactor to ObjectFieldInfo?
 public type FieldInfo object {
     public string identifier;
     public typedesc fieldType;
     public boolean isOptional;
+    public typedesc objectType;
+    // TODO: intro. accessibilty concepts
 
-    new(fieldType) {
-
+    new(fieldType, objectType) {
     }
 
-    public native function setValue(any instance, any value);
+    public native function getValue(any instance) returns any|error;
+
+    public native function setValue(any instance, any value) returns error?;
 };
 
 public native function getServiceAnnotations(typedesc serviceType) returns (annotationData[]);

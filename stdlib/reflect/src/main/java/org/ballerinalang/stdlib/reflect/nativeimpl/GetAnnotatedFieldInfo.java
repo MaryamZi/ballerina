@@ -84,7 +84,8 @@ public class GetAnnotatedFieldInfo extends AbstractAnnotationReader {
                             BLangVMStructs.createBStruct(fieldInfoStructInfo, field.fieldName,
                                                          new BTypeDescValue(field.fieldType),
                                                          field.fieldType.getTag() == TypeTags.UNION_TAG
-                                                                 && ((BUnionType) field.fieldType).isNullable());
+                                                                 && ((BUnionType) field.fieldType).isNullable(),
+                                                         new BTypeDescValue(objectType));
                     BMap<String, BValue> annotData = createAnnotationDataRecord(context, annotationDataEntry.getKey(),
                                                                 (BMap<String, BValue>) annotationDataEntry.getValue());
                     BMap<String, BValue> annotatedFieldInfo =

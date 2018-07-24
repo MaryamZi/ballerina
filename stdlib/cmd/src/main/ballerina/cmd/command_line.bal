@@ -131,12 +131,11 @@ public type CommandLine object {
                         if (cmdParamMap.hasKey(ALL_REMAINING_ARGS_PARAM_KEY)) {
                             match (cmdParamMap[ALL_REMAINING_ARGS_PARAM_KEY]) {
                                 CommandPositionalParam remParam => {
-                                    ObjectSkeleton castCmdObject = check <ObjectSkeleton> commandObject;
-                                    string identifier = remParam.fieldInfo.identifier;
+                                    any remParamFieldVal = check remParam.fieldInfo.getValue(commandObject);
                                     // only supports a string array, todo:support all
-                                    match(castCmdObject[identifier]) {
+                                    match(remParamFieldVal) {
                                         string[] =>
-                                            castCmdObject[identifier] = remainingPositionalArray;
+                                            check remParam.fieldInfo.setValue(commandObject, remainingPositionalArray);
                                         any => {
                                             // shouldn't reach here
                                             error invalidPositionalParam =
@@ -200,18 +199,16 @@ public type BaseCommand object {
     }
 };
 
-//TODO: assume private fields and set via reflection
 function assignValue(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
-    ObjectSkeleton objInstance = check <ObjectSkeleton> cmdObject;
-    string fieldIdentifier = fieldInfo.identifier;
-    match(objInstance[fieldIdentifier]) {
-        string => objInstance[fieldIdentifier] = value;
-        int => objInstance[fieldIdentifier] = check <int> value;
-        boolean => objInstance[fieldIdentifier] = <boolean> value;
-        float => objInstance[fieldIdentifier] = check <float> value;
+    any fieldValue = check fieldInfo.getValue(cmdObject);
+    match (fieldValue) {
+        string => check fieldInfo.setValue(cmdObject, value);
+        int => check fieldInfo.setValue(cmdObject, check <int> value);
+        boolean => check fieldInfo.setValue(cmdObject, <boolean> value);
+        float => check fieldInfo.setValue(cmdObject, check <float> value);
         byte => {
             int intvalue = check <int> value;
-            objInstance[fieldIdentifier] = check <byte> intvalue;
+            check fieldInfo.setValue(cmdObject, check <byte> intvalue);
         }
         any[] => {
             string arrayValue;
@@ -223,8 +220,8 @@ function assignValue(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
                 throw arrError;
             }
 
-            match(objInstance[fieldIdentifier]) {
-                string[] => objInstance[fieldIdentifier] = arrayValue.split(COMMA);
+            match (fieldValue) {
+                string[] => check fieldInfo.setValue(cmdObject, arrayValue.split(COMMA));
                 int[] => {
                     int[] intArray = [];
                     int arrIndex = 0;
@@ -233,7 +230,7 @@ function assignValue(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
                         arrIndex++;
                     }
                     validateArity();
-                    objInstance[fieldIdentifier] = intArray;
+                    check fieldInfo.setValue(cmdObject, intArray);
                 }
                 boolean[] => {
                     boolean[] booleanArray = [];
@@ -243,7 +240,7 @@ function assignValue(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
                         arrIndex++;
                     }
                     validateArity();
-                    objInstance[fieldIdentifier] = booleanArray;
+                    check fieldInfo.setValue(cmdObject, booleanArray);
                 }
                 float[] => {
                     float[] floatArray = [];
@@ -253,7 +250,7 @@ function assignValue(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
                         arrIndex++;
                     }
                     validateArity();
-                    objInstance[fieldIdentifier] = floatArray;
+                    check fieldInfo.setValue(cmdObject, floatArray);
                 }
                 byte[] => {
                     byte[] byteArray = [];
@@ -264,26 +261,23 @@ function assignValue(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
                         arrIndex++;
                     }
                     validateArity();
-                    objInstance[fieldIdentifier] = byteArray;
+                    check fieldInfo.setValue(cmdObject, byteArray);
                 }
                 any => {
                     error unsupportedType =
-                        { message: "unsupported CLI option/param type for field: " + fieldIdentifier };
+                        { message: "unsupported CLI option/param type for field: " + fieldInfo.identifier };
                     throw unsupportedType;
                 }
             }
         }
         any => {
-            error unsupportedType = { message: "unsupported CLI option/param type for field: " + fieldIdentifier };
+            error unsupportedType = { message: "unsupported CLI option/param type for field: " + fieldInfo.identifier };
             throw unsupportedType;
         }
     }
 }
 
-//TODO: assume private fields and set via reflection
 function addMapEntry(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
-    ObjectSkeleton objInstance = check <ObjectSkeleton> cmdObject;
-    string fieldIdentifier = fieldInfo.identifier;
     string[] keyValueEntry = value.split(EQUALS);
     if (lengthof keyValueEntry != 2) {
         //todo: handle > 1 "=" scenarios better
@@ -291,7 +285,7 @@ function addMapEntry(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
         throw invalidMapEntryErr;
     }
 
-    any|map valueMap = objInstance[fieldIdentifier]; //workaround for map issue
+    any|map valueMap = check fieldInfo.getValue(cmdObject); //workaround for map match issue #9705
 
     // todo: address key already exists scenarios
     match(valueMap) {
@@ -321,7 +315,8 @@ function addMapEntry(any cmdObject, reflect:FieldInfo fieldInfo, string value) {
             anyMap[keyValueEntry[0]] = keyValueEntry[1]; //add as string for any constrained todo: revisit!
         }
         any => {
-            error unsupportedType = { message: "unsupported CLI dynamic option type for field: " + fieldIdentifier } ;
+            error unsupportedType = { message: "unsupported CLI dynamic option type for field: "
+                                                + fieldInfo.identifier } ;
             throw unsupportedType;
         }
     }
@@ -371,7 +366,7 @@ function isInArray(int[] intArray, int element) returns boolean {
 }
 
 function validateArity() {
-    //todo
+    // TODO: impl.
 }
 
 function processDynamicOptions(any commandObject, map<string> requiredOptions, map<string> optionUniqueIdentifierMap)
@@ -476,8 +471,4 @@ type CommandDynamicOption record {
 type CommandPositionalParam record {
     reflect:FieldInfo fieldInfo;
     ParamConfig paramConfig;
-};
-
-public type ObjectSkeleton object {
-
 };
