@@ -28,6 +28,8 @@ import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.util.codegen.PackageInfo;
 import org.ballerinalang.util.codegen.StructureTypeInfo;
 
+import static org.ballerinalang.stdlib.reflect.ReflectConstants.PKG_REFLECT;
+
 /**
  * Common logic for reading Global level annotation.
  *
@@ -36,18 +38,14 @@ import org.ballerinalang.util.codegen.StructureTypeInfo;
 abstract class AbstractAnnotationReader extends BlockingNativeCallableUnit {
 
     private static final String PKG_INTERNAL = "ballerina/internal";
-    protected static final String PKG_REFLECT = "ballerina/reflect";
     private static final String STRUCT_ANNOTATION = "annotationData";
-    protected static final String FIELD_INFO = "FieldInfo";
-    protected static final String ANNOTATED_FIELD_INFO = "AnnotatedFieldInfo";
-    static final String DOT = ".";
 
     BValue getAnnotationValue(Context context, String pkgPath, String key) {
         final BMap bMap = ConnectorSPIModelHelper.getAnnotationVariable(pkgPath, context.getProgramFile());
         return createAnnotationStructArray(context, bMap.get(key));
     }
 
-    protected BRefValueArray createAnnotationStructArray(Context context, BValue map) {
+    private BRefValueArray createAnnotationStructArray(Context context, BValue map) {
         if (map == null || map.getType().getTag() != BTypes.typeMap.getTag()) {
             return null;
         }
@@ -63,7 +61,7 @@ abstract class AbstractAnnotationReader extends BlockingNativeCallableUnit {
         return annotationArray;
     }
 
-    protected BMap<String, BValue> createAnnotationDataRecord(Context context, String key,
+    BMap<String, BValue> createAnnotationDataRecord(Context context, String key,
                                                               BMap<String, BValue> annotationValue) {
         PackageInfo packageInfo = context.getProgramFile().getPackageInfo(PKG_REFLECT);
         StructureTypeInfo structInfo = packageInfo.getStructInfo(STRUCT_ANNOTATION);

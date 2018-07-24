@@ -23,6 +23,8 @@ import org.ballerinalang.model.values.BTypeDescValue;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 
+import static org.ballerinalang.stdlib.reflect.ReflectConstants.DOT;
+
 /**
  * Get struct field's Annotations.
  *

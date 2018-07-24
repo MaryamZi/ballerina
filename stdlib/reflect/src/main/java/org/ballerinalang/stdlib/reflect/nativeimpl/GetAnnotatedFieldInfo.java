@@ -38,6 +38,11 @@ import org.ballerinalang.util.codegen.StructureTypeInfo;
 
 import java.util.Map;
 
+import static org.ballerinalang.stdlib.reflect.ReflectConstants.ANNOTATED_FIELD_INFO;
+import static org.ballerinalang.stdlib.reflect.ReflectConstants.DOT;
+import static org.ballerinalang.stdlib.reflect.ReflectConstants.FIELD_INFO;
+import static org.ballerinalang.stdlib.reflect.ReflectConstants.PKG_REFLECT;
+
 /**
  * Get Function's Annotations.
  *
