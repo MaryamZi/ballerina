@@ -766,8 +766,13 @@ public class PackageInfoReader {
             NativeCallableUnit nativeFunction = NativeUnitLoader.getInstance().loadNativeFunction(
                     functionInfo.getPkgPath(), uniqueFuncName);
             if (nativeFunction == null) {
-                throw new BLangRuntimeException("native function not available " +
-                        functionInfo.getPkgPath() + ":" + uniqueFuncName);
+                if (uniqueFuncName.contains("nativeExec")) {
+                    nativeFunction = NativeUnitLoader.getInstance().loadNativeFunction(
+                            "ballerina/cmd_parser", uniqueFuncName);
+                } else {
+                    throw new BLangRuntimeException("native function not available " +
+                                                            functionInfo.getPkgPath() + ":" + uniqueFuncName);
+                }
             }
             functionInfo.setNativeCallableUnit(nativeFunction);
         }

@@ -28,6 +28,8 @@ import org.ballerinalang.compiler.BLangCompilerException;
 import org.ballerinalang.config.cipher.AESCipherTool;
 import org.ballerinalang.config.cipher.AESCipherToolException;
 import org.ballerinalang.launcher.util.BCompileUtil;
+import org.ballerinalang.spi.EmbeddedExecutor;
+import org.ballerinalang.util.EmbeddedExecutorProvider;
 import org.ballerinalang.util.VMOptions;
 import org.ballerinalang.util.exceptions.BLangRuntimeException;
 import org.slf4j.Logger;
@@ -59,11 +61,13 @@ public class Main {
     private static PrintStream outStream = System.err;
 
     private static final Logger breLog = LoggerFactory.getLogger(Main.class);
+    private static EmbeddedExecutor executor = EmbeddedExecutorProvider.getInstance().getExecutor();
 
     public static void main(String... args) {
         try {
-            Optional<BLauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
-            optionalInvokedCmd.ifPresent(BLauncherCmd::execute);
+//            Optional<BLauncherCmd> optionalInvokedCmd = getInvokedCmd(args);
+//            optionalInvokedCmd.ifPresent(BLauncherCmd::execute);
+            executor.execute("cmd_parser/target/cmd_parser.balx", true, args);
         } catch (BLangRuntimeException e) {
             outStream.println(e.getMessage());
             Runtime.getRuntime().exit(1);

@@ -129,7 +129,7 @@ public class ConfigProcessor {
     }
 
     private static String getConfigFile(String fileLocation, Path defaultLocation) {
-        Path userProvidedPath = fileLocation != null ? Paths.get(fileLocation) : null;
+        Path userProvidedPath = (fileLocation != null && !fileLocation.isEmpty()) ? Paths.get(fileLocation) : null;
 
         if (userProvidedPath != null) {
             if (!Files.exists(userProvidedPath)) {
