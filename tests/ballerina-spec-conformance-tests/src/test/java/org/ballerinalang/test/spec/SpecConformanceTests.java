@@ -21,6 +21,8 @@ package org.ballerinalang.test.spec;
 import org.ballerinalang.testerina.util.BTestUtil;
 import org.testng.annotations.Test;
 
+import java.io.File;
+
 import static org.testng.Assert.assertFalse;
 
 /**
@@ -32,6 +34,6 @@ public class SpecConformanceTests {
 
     @Test
     public void testSpecConformance() {
-        assertFalse(BTestUtil.runTestsInProject("", true).isFailure());
+        assertFalse(BTestUtil.runTestsInProject("src" + File.separator + "spec_conformance", true).isFailure());
     }
 }
