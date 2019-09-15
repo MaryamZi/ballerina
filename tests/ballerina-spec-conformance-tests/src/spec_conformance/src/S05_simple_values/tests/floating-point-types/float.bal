@@ -71,11 +71,19 @@ function testFloatZeroValues() {
     test:assertTrue(f1 == f2, msg = "expected +0.0 and -0.0 to be of same value");
 
     match f1 {
-        0.0 => test:assertTrue(true);
-        _ => test:assertFail(msg = "expected +0.0 to be same shape as 0.0");
+        0.0 => {
+            test:assertTrue(true);
+        }
+        _ => {
+            test:assertFail(msg = "expected +0.0 to be same shape as 0.0");
+        }
     }
     match f2 {
-        0.0 => test:assertTrue(true);
-        _ => test:assertFail(msg = "expected -0.0 to be same shape as 0.0");
+        0.0 => {
+            test:assertTrue(true);
+        }
+        _ => {
+            test:assertFail(msg = "expected -0.0 to be same shape as 0.0");
+        }
     }
 }

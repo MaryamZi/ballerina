@@ -25,7 +25,7 @@ import ballerina/test;
 # + invalidReasonFailureMessage - the failure message on reason mismatch
 public function assertPanic(function() returns any|error func, string expectedReason,
                             string invalidReasonFailureMessage) {
-    var result = trap func.call();
+    var result = trap func();
     if (result is error) {
         test:assertEquals(result.reason(), expectedReason, msg = invalidReasonFailureMessage);
     } else {

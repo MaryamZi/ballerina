@@ -52,7 +52,7 @@ function testStringLiterals() {
 function testStringImmutability() {
     string s1 = S;
     string s2 = s1;
-    s1 = s1.replace("const", "1");
-    test:assertTrue(s1 == "test string 1", msg = "expected s1's value to have changed");
+    s1 = s1.concat("const", "1");
+    test:assertTrue(s1 == "test string constconst1", msg = "expected s1's value to have changed");
     test:assertTrue(s2 == S, msg = "expected original string to not be mutated");
 }
