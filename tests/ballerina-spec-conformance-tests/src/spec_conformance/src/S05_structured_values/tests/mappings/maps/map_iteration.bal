@@ -23,14 +23,12 @@ import ballerina/test;
 @test:Config {}
 function testMapIteration() {
     map<string|float|int> m1 = { fieldOne: "valueOne", fieldTwo: 2.0, fieldThree: 3 };
-    m1.fieldFour = 4;
+    m1["fieldFour"] = 4;
 
     string result = "";
-    foreach (string, string|float|int) (key, value) in m1 {
-        if (value is float) {
-            result += string.convert(value);
-        } else if (value is int) {
-            result += string.convert(value);
+    foreach [string, string|float|int] [key, value] in m1.entries() {
+        if (value is float|int) {
+            result += value.toString();
         } else {
             result += value;
         }

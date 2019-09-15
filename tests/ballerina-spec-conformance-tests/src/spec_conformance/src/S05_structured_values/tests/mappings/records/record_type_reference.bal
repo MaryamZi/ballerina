@@ -46,14 +46,14 @@ function testRecordTypeReferenceOpenRestFieldOverride() {
     boolean bTrue = true;
     boolean bFalse = false;
 
-    OpenRecordThree r1 = { fieldOne: s1, fieldThree: bTrue, fieldFour: bFalse };
-    r1.fieldFour = s1;
-    r1.fieldFive = bFalse;
+    OpenRecordThree r1 = { fieldOne: s1, fieldThree: bTrue, "fieldFour": bFalse };
+    r1["fieldFour"] = s1;
+    r1["fieldFive"] = bFalse;
 
     test:assertEquals(r1.fieldOne, s1);
     test:assertEquals(r1.fieldThree, bTrue);
-    test:assertEquals(r1.fieldFour, s1);
-    test:assertEquals(r1.fieldFive, bFalse);
+    test:assertEquals(r1["fieldFour"], s1);
+    test:assertEquals(r1["fieldFive"], bFalse);
 }
 
 public type OpenRecordFour record {
@@ -66,11 +66,11 @@ function testRecordTypeReferenceClosedRestFieldOverride() {
     boolean bTrue = true;
     boolean bFalse = false;
 
-    OpenRecordFour r1 = { fieldOne: s1, fieldFour: bTrue, fieldThree: bFalse };
-    r1.fieldTwo = s1;
+    OpenRecordFour r1 = { fieldOne: s1, fieldFour: bTrue, "fieldThree": bFalse };
+    r1["fieldTwo"] = s1;
 
     test:assertEquals(r1.fieldOne, s1);
     test:assertEquals(r1.fieldFour, bTrue);
-    test:assertEquals(r1.fieldTwo, s1);
-    test:assertEquals(r1.fieldThree, bFalse);
+    test:assertEquals(r1["fieldTwo"], s1);
+    test:assertEquals(r1["fieldThree"], bFalse);
 }

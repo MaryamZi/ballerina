@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/test;
+import utils;
 
 // Both kinds of type descriptor are covariant in the types of their members.
 @test:Config {}
@@ -24,12 +25,12 @@ function testMapCovariance() {
     string st3 = "test string 3";
     map<string> stringMap = { one: st1, two: st2 };
     map<string|int> stringOrIntMap = stringMap;
-    stringOrIntMap.three = st3;
+    stringOrIntMap["three"] = st3;
 
-    test:assertEquals(stringOrIntMap.one, st1, msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
-    test:assertEquals(stringOrIntMap.two, st2, msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
-    test:assertEquals(stringOrIntMap.three, st3, msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
-    utils:assertPanic(function () { stringOrIntMap.four = 1; },
+    test:assertEquals(stringOrIntMap["one"], st1, msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
+    test:assertEquals(stringOrIntMap["two"], st2, msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
+    test:assertEquals(stringOrIntMap["three"], st3, msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
+    utils:assertPanic(function () { stringOrIntMap["four"] = 1; },
                       INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 }

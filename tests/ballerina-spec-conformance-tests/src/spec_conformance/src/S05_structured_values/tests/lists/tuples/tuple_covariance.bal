@@ -20,8 +20,8 @@ import utils;
 // Both kinds of type descriptor are covariant in the types of their members.
 @test:Config {}
 function testTupleCovariance() {
-    (string, boolean) sbTuple = ("string one", true);
-    (string|int, float|boolean) unionTuple = sbTuple;
+    [string, boolean] sbTuple = ["string one", true];
+    [string|int, float|boolean] unionTuple = sbTuple;
 
     test:assertEquals(sbTuple[0], "string one", msg = "expected the original value");
     test:assertEquals(sbTuple[1], true, msg = "expected the original value");

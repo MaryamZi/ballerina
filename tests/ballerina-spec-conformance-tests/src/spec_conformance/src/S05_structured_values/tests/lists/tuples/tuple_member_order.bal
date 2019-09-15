@@ -25,7 +25,7 @@ function testBasicTypeTupleMemberOrder() {
     float a3 = 20.2;
     int a4 = 11;
 
-    (int, string, float) tuple = (a1, a2, a3);
+    [int, string, float] tuple = [a1, a2, a3];
 
     test:assertEquals(tuple[0], a1, msg = EXPECTED_VALUE_NOT_FOUND_AT_INDEX_FAILURE_MESSAGE + "0");
     test:assertEquals(tuple[1], a2, msg = EXPECTED_VALUE_NOT_FOUND_AT_INDEX_FAILURE_MESSAGE + "1");
@@ -43,7 +43,7 @@ function testRecordTupleMemberOrder() {
     BarRecordEight a6 = { barFieldOne: 100 };
     FooRecordEight a7 = { fooFieldOne: "valueTwo" };
 
-    (FooRecordEight, BarRecordEight) tuple2 = (a5, a6);
+    [FooRecordEight, BarRecordEight] tuple2 = [a5, a6];
 
     test:assertEquals(tuple2[0], a5, msg = EXPECTED_VALUE_NOT_FOUND_AT_INDEX_FAILURE_MESSAGE + "0");
     test:assertEquals(tuple2[1], a6, msg = EXPECTED_VALUE_NOT_FOUND_AT_INDEX_FAILURE_MESSAGE + "1");
@@ -58,7 +58,7 @@ function testObjectTupleMemberOrder() {
     BarObjectEight a9 = new(200);
     FooObjectEight a10 = new("valueTwo");
 
-    (FooObjectEight, BarObjectEight) tuple3 = (a8, a9);
+    [FooObjectEight, BarObjectEight] tuple3 = [a8, a9];
 
     test:assertEquals(tuple3[0], a8, msg = EXPECTED_VALUE_NOT_FOUND_AT_INDEX_FAILURE_MESSAGE + "0");
     test:assertEquals(tuple3[1], a9, msg = EXPECTED_VALUE_NOT_FOUND_AT_INDEX_FAILURE_MESSAGE + "1");

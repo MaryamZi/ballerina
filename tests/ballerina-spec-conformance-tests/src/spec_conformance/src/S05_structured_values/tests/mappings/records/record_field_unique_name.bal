@@ -31,15 +31,15 @@ function testRecordFieldUniqueName() {
     string stringVal = "test string 1";
     int integerVal = 1;
 
-    b1.bazFieldTwo = stringVal;
+    b1["bazFieldTwo"] = stringVal;
     test:assertEquals(b1.length(), 2, msg = "expected the record to have two fields");
     test:assertEquals(b1.bazFieldOne, newFloatVal, msg = "expected the field to have the same value");
-    test:assertEquals(b1.bazFieldTwo, stringVal, msg = "expected a field with the newly added value");
+    test:assertEquals(b1["bazFieldTwo"], stringVal, msg = "expected a field with the newly added value");
 
-    b1.bazFieldTwo = integerVal;
+    b1["bazFieldTwo"] = integerVal;
     test:assertEquals(b1.length(), 2, msg = "expected the record to have two fields");
     test:assertEquals(b1.bazFieldOne, newFloatVal, msg = "expected the field to have the same value");
-    test:assertEquals(b1.bazFieldTwo, integerVal, msg = "expected the field to have the updated value");
+    test:assertEquals(b1["bazFieldTwo"], integerVal, msg = "expected the field to have the updated value");
 }
 
 public type BazRecordTwelve record {

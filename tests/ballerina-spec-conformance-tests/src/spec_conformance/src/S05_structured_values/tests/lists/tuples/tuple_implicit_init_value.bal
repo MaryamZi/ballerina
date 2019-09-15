@@ -18,9 +18,9 @@ import ballerina/test;
 
 @test:Config {}
 function testImplicitInitialValuesBroken() {
-    (int, boolean, string)[] tupleArray = [];
-    tupleArray[1] = (200, true, "test string");
-    (int, boolean, string) expTuple = (0, false, "");
+    [int, boolean, string][] tupleArray = [];
+    tupleArray[1] = [200, true, "test string"];
+    [int, boolean, string] expTuple = [0, false, ""];
     test:assertEquals(tupleArray[0], expTuple,
         msg = "expected implicit initial value of (int, boolean, string) to be (0, false, \"\")");
 }

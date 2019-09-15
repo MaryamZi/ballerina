@@ -46,8 +46,8 @@ const EXPECTED_TO_NOT_BE_ABLE_TO_ADD_VALUE_NOT_OF_SAME_OR_SUB_TYPE_FAILURE_MESSA
 @test:Config {}
 function testArrayFreezeOnContainer() {
     int[] a1 = [1, 2, 3];
-    _ = a1.freeze();
-    utils:assertPanic(function () { insertMemberToArray(a1, 0, 1); }, B7A_INVALID_UPDATE_REASON,
+    int[] a2 = a1.cloneReadOnly();
+    utils:assertPanic(function () { insertMemberToArray(a2, 0, 1); }, B7A_INVALID_UPDATE_REASON,
                             IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 
@@ -62,9 +62,9 @@ function insertMemberToArray(any[] array, int index, any member) {
 
 @test:Config {}
 function testTupleFreezeOnContainer() {
-    (int, boolean) a2 = (1, false);
-    _ = a2.freeze();
-    utils:assertPanic(function () { insertMemberToTuple(a2, 2); }, B7A_INVALID_UPDATE_REASON,
+    [int, boolean] a2 = [1, false];
+    [int, boolean] a3 = a2.cloneReadOnly();
+    utils:assertPanic(function () { insertMemberToTuple(a3, 2); }, B7A_INVALID_UPDATE_REASON,
                             IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 
@@ -72,22 +72,20 @@ function testTupleFreezeOnContainer() {
 #
 # + tuple - the tuple to which the member should be added
 # + member - the member to be added
-function insertMemberToTuple((any, any) tuple, any member) {
+function insertMemberToTuple([any, any] tuple, any member) {
     tuple[0] = member;
 }
 
 @test:Config {}
 function testMapFreezeOnContainer() {
-    map<string|int|FooObjectThirteen> a3 = { one: 1, two: "two" };
-    var result = a3.freeze();
-    if (result is map<string|int|FooObjectThirteen>) {
-        var trappedResult = trap insertMemberToMap(result, "two", 2);
-        if (trappedResult is error) {
-            test:assertEquals(trappedResult.reason(), B7A_INVALID_UPDATE_REASON,
-                msg = IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
-        } else {
-            test:assertFail(msg = "expected expression to panic");
-        }
+    map<string|int> a3 = { one: 1, two: "two" };
+    var result = a3.cloneReadOnly();
+    var trappedResult = trap insertMemberToMap(result, "two", 2);
+    if (trappedResult is error) {
+        test:assertEquals(trappedResult.reason(), B7A_INVALID_UPDATE_REASON,
+            msg = IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
+    } else {
+        test:assertFail(msg = "expected expression to panic");
     }
 }
 
@@ -103,8 +101,8 @@ function insertMemberToMap(map<any|error> mapVal, string index, any|error member
 @test:Config {}
 function testRecordFreezeOnContainer() {
     FooRecordThirteen a4 = { fooFieldOne: "test string 1" };
-    _ = a4.freeze();
-    utils:assertPanic(function () { updateFooRecord(a4, "test string 2"); }, B7A_INVALID_UPDATE_REASON,
+    FooRecordThirteen a5 = a4.cloneReadOnly();
+    utils:assertPanic(function () { updateFooRecord(a5, "test string 2"); }, B7A_INVALID_UPDATE_REASON,
                             IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 
@@ -120,8 +118,8 @@ function updateFooRecord(FooRecordThirteen fooRecord, string newFooFieldOne) {
 function testTableFreezeOnContainer() {
     table<BarRecordThirteen> a5 = table{};
     BarRecordThirteen b1 = { barFieldOne: 100 };
-    _ = a5.freeze();
-    utils:assertPanic(function () { insertMemberToTable(a5, b1); }, B7A_INVALID_UPDATE_REASON,
+    table<BarRecordThirteen> a6 = a5.cloneReadOnly();
+    utils:assertPanic(function () { insertMemberToTable(a6, b1); }, B7A_INVALID_UPDATE_REASON,
                             IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 
@@ -144,41 +142,53 @@ function testArrayFrozenStructureMembersFrozenness() {
     int[] a1 = [1, 2, 3];
     int[] a2 = [11, 12, 13];
     int[][] a3 = [a1, [5, 6], a2];
-    test:assertFalse(a1.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertFalse(a2.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertFalse(a3.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    _ = a3.freeze();
-    test:assertTrue(a1.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertTrue(a2.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertTrue(a3.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a1.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a2.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a3.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    
+    int[][] a4 = a3.cloneReadOnly();
+    test:assertFalse(a1.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a2.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a3.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+
+    int[] a5 = a4[0];
+    int[] a6 = a4[1];
+    test:assertTrue(a4.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertTrue(a5.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertTrue(a6.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
 }
 
 @test:Config {}
 function testTupleFrozenStructureMembersFrozenness() {
-    (int, boolean) a4 = (1, false);
-    (float, string, boolean) a5 = (100.0, "test string 1", false);
-    (anydata, int, (int, boolean)) a6 = (a5, 1, a4);
-    test:assertFalse(a4.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertFalse(a5.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertFalse(a6.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    _ = a6.freeze();
-    test:assertTrue(a4.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertTrue(a5.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertTrue(a6.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    [int, boolean] a4 = [1, false];
+    [float, string, boolean] a5 = [100.0, "test string 1", false];
+    [anydata, int, [int, boolean]] a6 = [a5, 1, a4];
+    test:assertFalse(a4.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a5.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a6.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    [anydata, int, [int, boolean]] a7 = a6.cloneReadOnly();
+    test:assertFalse(a4.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a5.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a6.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    
+    anydata a8  = a7[0];
+    [int, boolean] a9 = a7[2];
+    test:assertTrue(a7.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertTrue(a8.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertTrue(a9.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
 }
 
 @test:Config {}
 function testMapFrozenStructureMembersFrozenness() {
-    map<string|int|FooObjectThirteen> a7 = { one: 1, two: "two" };
+    map<string|int> a7 = { one: 1, two: "two" };
     map<int|boolean> a8 = { three: 12, four: true, five: false };
-    map<any> a9 = { intVal: 4, mapValOne: a7, mapValTwo: a8 };
-    test:assertFalse(a7.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertFalse(a8.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertFalse(a9.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    var result = a9.freeze();
-    if (result is map<string|int|FooObjectThirteen>) {
-        test:assertTrue(a7.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
-        test:assertTrue(a8.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    map<anydata> a9 = { intVal: 4, mapValOne: a7, mapValTwo: a8 };
+    test:assertFalse(a7.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a8.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a9.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    var result = a9.cloneReadOnly();
+    foreach anydata val in result {
+        test:assertTrue(val.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
     }
 }
 
@@ -186,14 +196,15 @@ function testMapFrozenStructureMembersFrozenness() {
 function testRecordFrozenStructureMembersFrozenness() {
     FooRecordThirteen a10 = { fooFieldOne: "test string 1" };
     BarRecordThirteen a11 = { barFieldOne: 1 };
-    BazRecord a12 = { bazFieldOne: 1.0, fooRecord: a10, bazRecord: a11 };
-    test:assertFalse(a10.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertFalse(a11.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertFalse(a12.isFrozen(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
-    _ = a12.freeze();
-    test:assertTrue(a10.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertTrue(a11.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
-    test:assertTrue(a12.isFrozen(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    BazRecord a12 = { bazFieldOne: 1.0, "fooRecord": a10, "bazRecord": a11 };
+    test:assertFalse(a10.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a11.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    test:assertFalse(a12.isReadOnly(), msg = EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE);
+    BazRecord b13 = a12.cloneReadOnly();
+    foreach any anyVal in b13 {
+        anydata val = <anydata> anyVal;
+        test:assertTrue(val.isReadOnly(), msg = EXPECTED_VALUE_TO_BE_FROZEN_FAILURE_MESSAGE);
+    }
 }
 
 // Values of basic type xml can also be frozen.
@@ -208,40 +219,40 @@ function testFrozenXml() {
 @test:Config {}
 function testArrayShapeOfContainters() {
     (int|string)?[] a1 = [1, 2];
-    var a2 = int[].convert(a1);
+    var a2 = int[].constructFrom(a1);
     test:assertTrue(a2 is int[], msg = EXPECTED_CONVERT_TO_SUCCEED_FAILURE_MESSAGE);
     a1[2] = "test string 1";
-    a2 = int[].convert(a1);
+    a2 = int[].constructFrom(a1);
     test:assertFalse(a2 is int[], msg = EXPECTED_CONVERT_TO_FAIL_FAILURE_MESSAGE);
 }
 
 @test:Config {}
 function testTupleShapeOfContainters() {
-    (float, int|string, boolean) a3 = (1.1, 1, true);
-    var a4 = (float, int, boolean).convert(a3);
-    test:assertTrue(a4 is (float, int, boolean), msg = EXPECTED_CONVERT_TO_SUCCEED_FAILURE_MESSAGE);
+    [float, int|string, boolean] a3 = [1.1, 1, true];
+    var a4 = [float, int, boolean].constructFrom(a3);
+    test:assertTrue(a4 is [float, int, boolean], msg = EXPECTED_CONVERT_TO_SUCCEED_FAILURE_MESSAGE);
     a3[1] = "test string 1";
-    a4 = (float, int, boolean).convert(a3);
-    test:assertFalse(a4 is (float, int, boolean), msg = EXPECTED_CONVERT_TO_FAIL_FAILURE_MESSAGE);
+    a4 = [float, int, boolean].constructFrom(a3);
+    test:assertFalse(a4 is [float, int, boolean], msg = EXPECTED_CONVERT_TO_FAIL_FAILURE_MESSAGE);
 }
 
 @test:Config {}
 function testMapShapeOfContainters() {
     map<int|boolean> a5 = { one: 1, two: 2, three: 3 };
-    var a6 = map<int>.convert(a5);
+    var a6 = map<int>.constructFrom(a5);
     test:assertTrue(a6 is map<int>, msg = EXPECTED_CONVERT_TO_SUCCEED_FAILURE_MESSAGE);
-    a5.four = true;
-    a6 = map<int>.convert(a5);
+    a5["four"] = true;
+    a6 = map<int>.constructFrom(a5);
     test:assertFalse(a6 is map<int>, msg = EXPECTED_CONVERT_TO_FAIL_FAILURE_MESSAGE);
 }
 
 @test:Config {}
 function testRecordShapeOfContainters() {
     BazRecordThree a7 = { bazFieldOne: 1.0 };
-    var a8 = BazRecord.convert(a7);
+    var a8 = BazRecord.constructFrom(a7);
     test:assertTrue(a8 is BazRecord, msg = EXPECTED_CONVERT_TO_SUCCEED_FAILURE_MESSAGE);
     a7.bazFieldOne = "1.0";
-    a8 = BazRecord.convert(a7);
+    a8 = BazRecord.constructFrom(a7);
     test:assertFalse(a8 is BazRecord, msg = EXPECTED_CONVERT_TO_FAIL_FAILURE_MESSAGE);
 }
 
@@ -273,7 +284,7 @@ function testArrayContainerValueInherentType() {
 
 @test:Config {}
 function testTupleContainerValueInherentType() {
-    (string|float, int) a2 = ("test string 1", 1);
+    [string|float, int] a2 = ["test string 1", 1];
     any anyVal = floatVal;
     var result = trap insertMemberToTuple(a2, anyVal);
     test:assertTrue(anyVal is string|float, msg = EXPECTED_VALUE_TO_BE_OF_SAME_OR_SUB_TYPE_FAILURE_MESSAGE);
@@ -333,9 +344,9 @@ function testArrayFrozenContainerShapeAndType() {
     test:assertTrue(!(a2 is int[]),
         msg = "expected value's type to not be of same type or sub type");
 
-    _ = a2.freeze();
-    result = trap insertMemberToArray(a1, a1.length() - 1, a2);
-    test:assertTrue(a2 is int[],
+    (int|string)?[] a3 = a2.cloneReadOnly();
+    result = trap insertMemberToArray(a1, a1.length() - 1, a3);
+    test:assertTrue(a3 is int[],
         msg = "expected value's type to match shape after freezing");
      test:assertTrue(!(result is error),
                      msg = "expected to be able to add a frozen value that conforms to shape");
@@ -343,17 +354,17 @@ function testArrayFrozenContainerShapeAndType() {
 
 @test:Config {}
 function testTupleFrozenContainerShapeAndType() {
-    ((int, string), int) a3 = ((1, "test string 1"), 2);
-    (int|float, string) a4 = (2, "test string 2");
+    [[int, string], int] a3 = [[1, "test string 1"], 2];
+    [int|float, string] a4 = [2, "test string 2"];
     var result = trap insertMemberToTuple(a3, a4);
      test:assertTrue(result is error,
                      msg = "expected to not be able to add a value that violates shape");
-    test:assertTrue(!(a4 is (int, string)),
+    test:assertTrue(!(a4 is [int, string]),
         msg = "expected value's type to not be of same type or sub type");
 
-    _ = a4.freeze();
-    result = trap insertMemberToTuple(a3, a4);
-    test:assertTrue(a4 is (int, string),
+    [int|float, string] a5 = a4.cloneReadOnly();
+    result = trap insertMemberToTuple(a3, a5);
+    test:assertTrue(a5 is [int, string],
         msg = "expected value's type to match shape after freezing");
     test:assertTrue(!(result is error),
         msg = "expected to be able to add a frozen value that conforms to shape");
@@ -368,9 +379,9 @@ function testRecordFrozenContainerShapeAndType() {
     test:assertTrue(result is error, msg = "expected to not be able to add a value that violates shape");
     test:assertTrue(!(a10 is BazRecord), msg = "expected value's type to not be of same type or sub type");
 
-    _ = a10.freeze();
-    result = trap updateRecordBazField(a8, a10);
-    test:assertTrue(a10 is BazRecord, msg = "expected value's type to match shape after freezing");
+    anydata a11 = a10.cloneReadOnly();
+    result = trap updateRecordBazField(a8, a11);
+    test:assertTrue(a11 is BazRecord, msg = "expected value's type to match shape after freezing");
     test:assertTrue(!(result is error), msg = "expected to be able to add a frozen value that conforms to shape");
 }
 
@@ -378,19 +389,16 @@ function testRecordFrozenContainerShapeAndType() {
 function testMapFrozenContainerShapeAndType() {
     map<map<string>|float> a5 = { one: { a: "a", bc: "b c" }, two: 1.0 };
     map<string|boolean> a6 = { three: "3", four: "4" };
-    any a7 = a6;
+    anydata a7 = a6;
     var result = trap insertMemberToMap(a5, "three", a7);
     test:assertTrue(result is error,
         msg = "expected to not be able to add a value that violates shape");
     test:assertTrue(!(a7 is map<string>|float),
         msg = "expected value's type to not be of same type or sub type");
 
-    any|error? err = a7.freeze();
-    if err is error {
-        test:assertFail(msg = "failed in executing freeze operation");
-    }
-    result = trap insertMemberToMap(a5, "three", a7);
-    test:assertTrue(a7 is map<string>|float,
+    anydata a8 = a7.cloneReadOnly();
+    result = trap insertMemberToMap(a5, "three", a8);
+    test:assertTrue(a8 is map<string>|float,
         msg = "expected value's type to match shape after freezing");
     test:assertTrue(!(result is error),
         msg = "expected to be able to add a frozen value that conforms to shape");
@@ -420,7 +428,7 @@ public type BazRecordFour record {
 # + rec - the record to update
 # + value - the new value for `bazFieldTwo`
 function updateRecordBazField(record{} rec, anydata value) {
-    rec.bazFieldTwo = value;
+    rec["bazFieldTwo"] = value;
 }
 
 public type FooRecordThirteen record {|

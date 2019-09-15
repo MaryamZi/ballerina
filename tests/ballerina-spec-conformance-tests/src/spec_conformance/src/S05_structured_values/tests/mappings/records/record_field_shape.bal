@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/test;
-import utils;
 
 const CONVERSION_ERROR_REASON = "{ballerina}ConversionError";
 
@@ -24,13 +23,13 @@ const CONVERSION_ERROR_REASON = "{ballerina}ConversionError";
 // which is the shape of the value of f.
 @test:Config {}
 function testRecordFieldShape() {
-    DefaultOpenRecord r1 = { bazFieldTwo: "test string 1", bazFieldOne: 1.0 };
-    var conversionResult = BazRecordEleven.convert(r1);
+    DefaultOpenRecord r1 = { "bazFieldTwo": "test string 1", "bazFieldOne": 1.0 };
+    var conversionResult = BazRecordEleven.constructFrom(r1);
     test:assertTrue(conversionResult is BazRecordEleven, msg = "expected conversion to succeed");
 
     // change the value's shape
-    r1.bazFieldTwo = 1.0;
-    conversionResult = BazRecordEleven.convert(r1);
+    r1["bazFieldTwo"] = 1.0;
+    conversionResult = BazRecordEleven.constructFrom(r1);
     if (conversionResult is error) {
         test:assertEquals(conversionResult.reason(), CONVERSION_ERROR_REASON,
             msg = "invalid reason on conversion failure due to shape mismatch");
@@ -40,8 +39,8 @@ function testRecordFieldShape() {
 
     // create a record without a required field,
     // but with a new field with a different name and matching value shape
-    DefaultOpenRecord r2 = { bazFieldThree: "test string 3", bazFieldOne: 1.0 };
-    conversionResult = BazRecordEleven.convert(r2);
+    DefaultOpenRecord r2 = { "bazFieldThree": "test string 3", "bazFieldOne": 1.0 };
+    conversionResult = BazRecordEleven.constructFrom(r2);
     if (conversionResult is error) {
         test:assertEquals(conversionResult.reason(), CONVERSION_ERROR_REASON,
             msg = "invalid reason on conversion failure due to shape mismatch");

@@ -39,13 +39,15 @@ function testXmlValue() {
 function testXmlAttributes() {
     xml x1 = xml `<book>The Lost World</book>`;
     map<string>? attributeMap = x1@;
-    test:assertEquals(attributeMap.length(), 0, msg = "expected attribute count to be zero");
+    test:assertTrue(attributeMap is map<string> && attributeMap.length() == 0, 
+                    msg = "expected attribute count to be zero");
 
     xml x2 = xml `<book status="available" count="5"/>`;
     attributeMap = x2@;
-    test:assertEquals(attributeMap.length(), 2, msg = "expected attribute count to be zero");
-    test:assertEquals(attributeMap.status, "available", msg = "expected value to be \"available\"");
-    test:assertEquals(attributeMap.count, "5", msg = "expected value to be \"5\"");
+    test:assertTrue(attributeMap is map<string> && attributeMap.length() == 2, 
+                    msg = "expected attribute count to be zero");
+    test:assertEquals(attributeMap["status"], "available", msg = "expected value to be \"available\"");
+    test:assertEquals(attributeMap["count"], "5", msg = "expected value to be \"5\"");
 }
 
 // The content of each element in the sequence is itself a distinct XML value.
@@ -112,7 +114,7 @@ function testXmlIteration() {
     }
 
     test:assertEquals(arr.length(), 13, msg = "expected iteration to result in 13 elements");
-    string[] stringArray = <string[]> string[].convert(arr);
+    string[] stringArray = <string[]> string[].constructFrom(arr);
     string actualContent = "";
     foreach string s in stringArray {
         actualContent += s;

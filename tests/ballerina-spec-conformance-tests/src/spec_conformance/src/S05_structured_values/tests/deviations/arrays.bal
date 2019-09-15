@@ -14,9 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/test;
-import utils;
-
 const int length = 3;
 
 // array-type-descriptor := member-type-descriptor [ [ array-length ] ]

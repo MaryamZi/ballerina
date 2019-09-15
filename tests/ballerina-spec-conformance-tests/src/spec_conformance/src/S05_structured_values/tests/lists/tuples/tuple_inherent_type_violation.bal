@@ -27,13 +27,13 @@ const INVALID_REASON_ON_INHERENT_TYPE_VIOLATIONG_TUPLE_UPDATE_FAILURE_MESSAGE =
 
 @test:Config {}
 function testBasicTypeTupleInherentTypeViolation() {
-    (int, int) tuple = (1, 2);
-    (any, any) tupleWithAnyTypedMembers = tuple;
+    [int, int] tuple = [1, 2];
+    [any, any] tupleWithAnyTypedMembers = tuple;
     utils:assertPanic(function() { tupleWithAnyTypedMembers[0] = "not an int"; },
                       INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATIONG_TUPLE_UPDATE_FAILURE_MESSAGE);
 
-    (map<string>, map<string>) stringMapTuple = (
+    [map<string>, map<string>] stringMapTuple = [
         {
             one: "test string 1",
             two: "test string 2"
@@ -41,7 +41,7 @@ function testBasicTypeTupleInherentTypeViolation() {
         {
             three: "test string 3"
         }
-    );
+    ];
     tupleWithAnyTypedMembers = stringMapTuple;
 
     // `map<string|int>` looks like `map<string>`
@@ -58,13 +58,13 @@ function testBasicTypeTupleInherentTypeViolation() {
 function testRecordTupleInherentTypeViolation() {
     FooRecordSeven a1 = { fooFieldOne: "valueOne" };
     FooRecordSeven a2 = { fooFieldOne: "valueTwo" };
-    (FooRecordSeven, FooRecordSeven) tuple2 = (a1, a2);
-    (any, any) tupleWithAnyTypedMembers = tuple2;
+    [FooRecordSeven, FooRecordSeven] tuple2 = [a1, a2];
+    [any, any] tupleWithAnyTypedMembers = tuple2;
     utils:assertPanic(function() { tupleWithAnyTypedMembers[0] = "not a FooRecord"; },
                       INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATIONG_TUPLE_UPDATE_FAILURE_MESSAGE);
 
-    (map<FooRecordSeven>, map<FooRecordSeven>) fooRecordMapTuple = (
+    [map<FooRecordSeven>, map<FooRecordSeven>] fooRecordMapTuple = [
     {
         one: { fooFieldOne: "valueOne" },
         two: { fooFieldOne: "valueTwo" }
@@ -72,7 +72,7 @@ function testRecordTupleInherentTypeViolation() {
     {
         three: { fooFieldOne: "valueThree" }
     }
-    );
+    ];
     tupleWithAnyTypedMembers = fooRecordMapTuple;
 
     // `map<FooRecord|BarRecord>` looks like `map<FooRecord>`
@@ -89,13 +89,13 @@ function testRecordTupleInherentTypeViolation() {
 function testObjectTupleInherentTypeViolation() {
     FooObjectSeven a3 = new("valueOne");
     FooObjectSeven a4 = new("valueTwo");
-    (FooObjectSeven, FooObjectSeven) tuple3 = (a3, a4);
-    (any, any) tupleWithAnyTypedMembers = tuple3;
+    [FooObjectSeven, FooObjectSeven] tuple3 = [a3, a4];
+    [any, any] tupleWithAnyTypedMembers = tuple3;
     utils:assertPanic(function() { tupleWithAnyTypedMembers[0] = "not a FooRecord"; },
                       INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATIONG_TUPLE_UPDATE_FAILURE_MESSAGE);
 
-    (map<FooObjectSeven>, map<FooObjectSeven>) fooObjectMapTuple = (
+    [map<FooObjectSeven>, map<FooObjectSeven>] fooObjectMapTuple = [
         {
             one: new("valueOne"),
             two: new("valueTwo")
@@ -103,7 +103,7 @@ function testObjectTupleInherentTypeViolation() {
         {
             three: new("valueThree")
         }
-    );
+    ];
     tupleWithAnyTypedMembers = fooObjectMapTuple;
 
     FooObjectSeven f1 = new("valueOne");

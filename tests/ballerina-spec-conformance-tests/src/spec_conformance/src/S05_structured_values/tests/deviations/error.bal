@@ -24,6 +24,6 @@ import ballerina/test;
     groups: ["deviation"]
 }
 function testErrorTypeDescriptorsStackTraceBroken() {
-    error <string, map<anydata>> error1 = error("Error One", { detail: "failed" });
+    error <string, record { string message?; error cause?; }> error1 = error("Error One", detail = "failed");
     // test:assertNotEquals(error1.stackTrace(), (), msg = "expected stack trace to be a non-nil value");
 }

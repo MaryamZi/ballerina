@@ -43,38 +43,33 @@ function testFreezeOnContainerBroken() {
 
 function testFrozenArrayUpdateBroken() {
     int[] a1 = [1, 2, 3];
-    _ = a1.freeze();
-    a1[0] = 100;
-}
-
-function testFrozenTupleUpdateBroken() {
-    (int, boolean) a2 = (1, false);
-    _ = a2.freeze();
+    int[] a2 = a1.cloneReadOnly();
     a2[0] = 100;
 }
 
+function testFrozenTupleUpdateBroken() {
+    [int, boolean] a2 = [1, false];
+    [int, boolean] a3 = a2.cloneReadOnly();
+    a3[0] = 100;
+}
+
 function testFrozenMapUpdateBroken() {
-    map<string|int|FooObjectThirteen> a3 = { one: 1, two: "two" };
-    var result = a3.freeze();
-    if (result is map<string|int|FooObjectThirteen>) {
-        result.two = 2;
-    }
+    map<string|int> a3 = { one: 1, two: "two" };
+    map<string|int> a4 = a3.cloneReadOnly();
+    a4["two"] = 2;
 }
 
 function testFrozenRecordUpdateBroken() {
     FooRecordThirteen a4 = { fooFieldOne: "test string 1" };
-    _ = a4.freeze();
-    a4.fooFieldOne = "test string update";
+    FooRecordThirteen a5 = a4.cloneReadOnly();
+    a5.fooFieldOne = "test string update";
 }
 
 function testFrozenTableUpdateBroken() {
     table<BarRecordThirteen> a5 = table{};
     BarRecordThirteen b1 = { barFieldOne: 100 };
-    _ = a5.freeze();
-    error? err = a5.add(b1);
-    if err is error {
-        panic err;
-    }
+    table<BarRecordThirteen> a6 = a5.cloneReadOnly();
+    checkpanic a6.add(b1);
 }
 
 // A frozen container value can refer only to immutable values:
@@ -86,16 +81,17 @@ function testFrozenTableUpdateBroken() {
 }
 function testFrozenStructureMembersFrozennessBroken() {
     table<BarRecordThirteen> a13 = table{};
-    test:assertFalse(a13.isFrozen(), msg = "exected value to not be frozen");
+    test:assertFalse(a13.isReadOnly(), msg = "exected value to not be frozen");
     BarRecordThirteen a14 = { barFieldOne: 100 };
     error? err = a13.add(a14);
     if err is error {
         test:assertFail(msg = "failed in adding record to table");
     }
-    _ = a13.freeze();
-    test:assertTrue(a13.isFrozen(), msg = "exected value to be frozen");
-    //test:assertTrue(a14.isFrozen(), msg = "expected value to be frozen");
-    test:assertFalse(a14.isFrozen(), msg = "exected value to not be frozen");
+    table<BarRecordThirteen> a15 = a13.cloneReadOnly();
+    test:assertFalse(a13.isReadOnly(), msg = "exected value to be frozen");
+    test:assertTrue(a15.isReadOnly(), msg = "exected value to be frozen");
+    //test:assertTrue(a14.isReadOnly(), msg = "expected value to be frozen");
+    test:assertFalse(a14.isReadOnly(), msg = "exected value to not be frozen");
 }
 
 // The shape of the members of a container value contribute to the shape of the container.

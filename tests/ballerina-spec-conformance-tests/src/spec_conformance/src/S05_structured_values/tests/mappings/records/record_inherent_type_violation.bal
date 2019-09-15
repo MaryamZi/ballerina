@@ -39,7 +39,7 @@ function testRecordInherentTypeViolation() {
 }
 
 function updateClosedRecordWithMapField(record{} rec, anydata value) {
-    rec.mapField = value;
+    rec["mapField"] = value;
 }
 
 public type ClosedRecordWithMapField record {

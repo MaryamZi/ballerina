@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/test;
+import utils;
 
 // error-type-descriptor := error [<reason-type-descriptor[, detail-type-descriptor]>]
 // reason-type-descriptor := type-descriptor
@@ -25,9 +26,12 @@ import ballerina/test;
 function testErrorTypeDescriptor() {
     error error1 = error("Error One");
     error <string> error2 = error("Error Two");
-    error <string, map<anydata|error>> error3 = error("Error Three", { detail: "failed" });
-    error <string, map<error>> error4 = error("Error Four", { detailError: error1 });
-    test:assertEquals(error4.detail().detailError.reason(), error1.reason(),
+    error <string, record {| string message?; error cause?; anydata|error...; |}> error3 = 
+                                                                        error("Error Three", detail = "failed");
+    error <string, record {| string message?; error cause?; error...; |}> error4 = 
+                                                                        error("Error Four", detailError = error1);
+    error detError = <error> error4.detail()["detailError"];
+    test:assertEquals(detError.reason(), error1.reason(),
         msg = "expected error types detail to support map<error> type");
 }
 
@@ -39,8 +43,11 @@ function testErrorTypeDescriptor() {
 // ● a stack trace
 @test:Config {}
 function testErrorDetailFrozenness() {
-    error<string, map<anydata>> error1 = error("Error Three", { cause: "Core Error" });
-    utils:assertPanic(function () { error1.detail().key1 = 1.0; },
+    error<string, record {| string message?; error cause?; |}> error1 = error("Error Three", message = "Core Error");
+    utils:assertPanic(function () { 
+                        record {| anydata|error...; |} det = error1.detail();
+                        det["key1"] = 1.0;
+                      },
                       "{ballerina}InvalidUpdate",
                       "invalid error on error detail update");
 }

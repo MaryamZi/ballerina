@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/test;
-import utils;
 
 // The shape of a mapping value is an unordered collection of field shapes one for each field.
 // The field shape for a field f has a name, which is the same as the name of f, and a shape,
@@ -23,12 +22,12 @@ import utils;
 @test:Config {}
 function testMapFieldShape() {
     map<float|string> m1 = { bazFieldTwo: "test string 1", bazFieldOne: 1.0 };
-    var conversionResult = BazRecordTen.convert(m1);
+    var conversionResult = BazRecordTen.constructFrom(m1);
     test:assertTrue(conversionResult is BazRecordTen, msg = "expected conversion to succeed");
 
     // change the value's shape
-    m1.bazFieldTwo = 1.0;
-    conversionResult = BazRecordTen.convert(m1);
+    m1["bazFieldTwo"] = 1.0;
+    conversionResult = BazRecordTen.constructFrom(m1);
     if (conversionResult is error) {
         test:assertEquals(conversionResult.reason(), "{ballerina}ConversionError",
             msg = "invalid reason on conversion failure due to shape mismatch");
@@ -37,10 +36,10 @@ function testMapFieldShape() {
     }
 
     // remove a required field and add a new field with a different name
-    boolean removalStatus = m1.remove("bazFieldTwo");
-    test:assertTrue(removalStatus, msg = "expected removal to succeed");
-    m1.bazFieldThree = "test string 3";
-    conversionResult = BazRecordTen.convert(m1);
+    float|string elem = m1.remove("bazFieldTwo");
+    test:assertEquals(elem, 1.0, msg = "expected removal to succeed");
+    m1["bazFieldThree"] = "test string 3";
+    conversionResult = BazRecordTen.constructFrom(m1);
     if (conversionResult is error) {
         test:assertEquals(conversionResult.reason(), "{ballerina}ConversionError",
             msg = "invalid reason on conversion failure due to shape mismatch");

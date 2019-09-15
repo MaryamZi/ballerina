@@ -61,13 +61,13 @@ function testRecordFieldValueTypeConformance() {
 }
 
 function updateRecordFieldOne(record {| any|error...; |} r, any val) {
-    r.fieldOne = val;
+    r["fieldOne"] = val;
 }
 
 @test:Config {}
 function testRequiredFields() {
     BarRecord b1 = { fieldOne: s1, fieldTwo: i1, fieldThree: 1.0 };
-    var result = FooRecord.convert(b1);
+    var result = FooRecord.constructFrom(b1);
     test:assertTrue(result is FooRecord, 
                     msg = "expected conversion to succeed since all required fields are present");
     FooRecord convertedRecord = <FooRecord> result;
@@ -77,7 +77,7 @@ function testRequiredFields() {
                       msg = "expected converted record to have the corresponding source value");
 
     map<anydata> b2 = { fieldOne: "test string 1" };
-    result = FooRecord.convert(b2);
+    result = FooRecord.constructFrom(b2);
     if (result is error) {
         test:assertEquals(result.reason(), "{ballerina}ConversionError",
             msg = "expected conversion to fail due to missing fields");
@@ -91,7 +91,7 @@ function testOptionalFields() {
     float floatValue = 2.0;
 
     map<anydata> m1 = { fieldThree: floatValue };
-    var result = BarRecord.convert(m1);
+    var result = BarRecord.constructFrom(m1);
     test:assertTrue(result is BarRecord, 
                     msg = "expected conversion to succeed since all required fields are present");
     BarRecord convertedRecord = <BarRecord> result;
@@ -103,12 +103,13 @@ function testOptionalFields() {
 // Note that the delimited identifier syntax allows the field name to be any non-empty string.
 type QuuxRecord record {
     string 'string;
-    int 'int\ field;
+    // int 'int1field; // https://github.com/ballerina-platform/ballerina-lang/issues/18480
 };
 
 @test:Config {}
 function testDifferentFieldDescriptorsAndOrder() {
-    QuuxRecord b = { 'int\ field: i1, 'string: s1 };
+    // QuuxRecord b = { 'int\ field: i1, 'string: s1 };
+    QuuxRecord b = { 'string: s1 };
     test:assertEquals(b.'string, s1);
-    test:assertEquals(b.'int\ field, i1);
+    // test:assertEquals(b.'int\ field, i1);
 }

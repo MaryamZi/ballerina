@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/test;
-import utils;
 
 // A member of a list can be referenced by an integer index representing its position in the list.
 // For a list of length n, the indices of the members of the list, from first to last, are 0,1,...,n - 1.
@@ -28,7 +27,7 @@ function testBasicTypeTupleMemberReferenceByValidIntegerIndex() {
     int a4 = 200;
     boolean a5 = true;
     int a6 = 300;
-    (string, string, int, int, boolean) tuple = (a1, a2, a3, a4, a5);
+    [string, string, int, int, boolean] tuple = [a1, a2, a3, a4, a5];
 
     string b1 = tuple[0];
     string b2 = tuple[1];
@@ -53,7 +52,7 @@ function testRecordTupleMemberReferenceByValidIntegerIndex() {
     BarRecordNine a8 = { barFieldOne: 100 };
     FooRecordNine a9 = { fooFieldOne: "valueTwo" };
     BarRecordNine a10 = { barFieldOne: 50 };
-    (FooRecordNine, BarRecordNine, FooRecordNine, BarRecordNine) tuple2 = (a7, a8, a9, a10);
+    [FooRecordNine, BarRecordNine, FooRecordNine, BarRecordNine] tuple2 = [a7, a8, a9, a10];
 
     FooRecordNine b7 = tuple2[0];
     BarRecordNine b8 = tuple2[1];
@@ -73,7 +72,7 @@ function testObjectTupleMemberReferenceByValidIntegerIndex() {
     FooObjectNine a13 = new("valueTwo");
     BarObjectNine a14 = new(180);
 
-    (FooObjectNine, BarObjectNine, FooObjectNine, BarObjectNine) tuple3 = (a11, a12, a13, a14);
+    [FooObjectNine, BarObjectNine, FooObjectNine, BarObjectNine] tuple3 = [a11, a12, a13, a14];
 
     FooObjectNine b11 = tuple3[0];
     BarObjectNine b12 = tuple3[1];

@@ -31,14 +31,14 @@ type OpenRecord record {
 function testDefaultOpenRecord() {
     string s2 = "test string 2";
     int i2 = 2;
-    OpenRecord r1 = { fieldOne: s1, fieldTwo: s2 };
-    r1.fieldThree = i1;
+    OpenRecord r1 = { fieldOne: s1, "fieldTwo": s2 };
+    r1["fieldThree"] = i1;
     test:assertEquals(r1.fieldOne, s1);
-    test:assertEquals(r1.fieldTwo, s2);
-    test:assertEquals(r1.fieldThree, i1);
+    test:assertEquals(r1["fieldTwo"], s2);
+    test:assertEquals(r1["fieldThree"], i1);
 
-    r1.fieldTwo = i2;
-    test:assertEquals(r1.fieldTwo, i2);
+    r1["fieldTwo"] = i2;
+    test:assertEquals(r1["fieldTwo"], i2);
 }
 
 // if the record-rest-type is !, then there must not be any extra field shapes
@@ -50,7 +50,7 @@ function testClosedRecord() {
 }
 
 function updateClosedRecordWithOneField(record{} rec, anydata value) {
-    rec.newField = value;
+    rec["newField"] = value;
 }
 
 public type ClosedRecordWithOneField record {|
@@ -67,13 +67,13 @@ public type OpenRecordTwo record {|
 @test:Config {}
 function testOpenRecordWithSpecifiedRestType() {
     int i2 = 2;
-    OpenRecordTwo r1 = { fieldOne: s1, fieldTwo: i1 };
-    r1.fieldthree = i2;
+    OpenRecordTwo r1 = { fieldOne: s1, "fieldTwo": i1 };
+    r1["fieldthree"] = i2;
 
     utils:assertPanic(function () { updateOpenRecordTwo(r1, s1); }, INHERENT_TYPE_VIOLATION_REASON,
                             "invalid reason on inherent type violating record update");
 }
 
 function updateOpenRecordTwo(record {| any...; |} r, any val) {
-    r.fieldFour = val;
+    r["fieldFour"] = val;
 }
