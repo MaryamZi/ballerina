@@ -36,10 +36,10 @@ function testUnionTypeDescriptors() {
     test:assertEquals(si, iv, msg = "expected variable to hold the assigned value");
 
     map<string|int> m1 = { one: sv };
-    m1.two = iv;
+    m1["two"] = iv;
     map<any> anyMap = m1;
-    test:assertEquals(m1.one, sv, msg = "expected value to be the assigned value");
-    test:assertEquals(m1.two, iv, msg = "expected value to be the assigned value");
+    test:assertEquals(m1["one"], sv, msg = "expected value to be the assigned value");
+    test:assertEquals(m1["two"], iv, msg = "expected value to be the assigned value");
 
     utils:assertPanic(function () { anyMap["three"] = 1.0f; },
                       "{ballerina}InherentTypeViolation",
@@ -52,10 +52,10 @@ function testUnionTypeDescriptors() {
     test:assertEquals(fot, 2.0, msg = "expected variable to hold the assigned value");
 
     map<FLOAT_ONE_OR_TWO> m2 = { one: 1.0 };
-    m2.two = 2.0;
+    m2["two"] = 2.0;
     anyMap = m2;
-    test:assertEquals(m2.one, 1.0, msg = "expected value to be the assigned value");
-    test:assertEquals(m2.two, 2.0, msg = "expected value to be the assigned value");
+    test:assertEquals(m2["one"], 1.0, msg = "expected value to be the assigned value");
+    test:assertEquals(m2["two"], 2.0, msg = "expected value to be the assigned value");
 
     utils:assertPanic(function () { anyMap["three"] = 3.0f; },
                       "{ballerina}InherentTypeViolation",

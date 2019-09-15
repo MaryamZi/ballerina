@@ -35,10 +35,10 @@ function testOptionalTypeDescriptors() {
     test:assertEquals(s1, s2, msg = "expected values to be identified as equal");
 
     map<string?> msn = { one: sv };
-    msn.two = ();
+    msn["two"] = ();
     map<any> anyMap = msn;
-    test:assertEquals(msn.one, sv, msg = "expected value to be the assigned value");
-    test:assertEquals(msn.two, (), msg = "expected value to be the assigned value");
+    test:assertEquals(msn["one"], sv, msg = "expected value to be the assigned value");
+    test:assertEquals(msn["two"], (), msg = "expected value to be the assigned value");
 
     utils:assertPanic(function () { anyMap["three"] = 1.0d; },
                       "{ballerina}InherentTypeViolation",

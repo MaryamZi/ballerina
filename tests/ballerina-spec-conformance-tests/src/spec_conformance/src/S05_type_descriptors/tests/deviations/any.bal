@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/test;
-import utils;
 
 // A value belongs to the any type if and only if its basic type is not error. 
 // TODO: disallow adding an error to a map<any> via a function with type-widening params

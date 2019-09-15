@@ -24,7 +24,7 @@ boolean e = true;
 () f = ();
 
 (int|boolean)[2] g = [a, e];
-(string, float, decimal) h = (b, c, d);
+[string, float, decimal] h = [b, c, d];
 
 map<string|FooRecord|FooObject> i = {
     one: j,
@@ -48,7 +48,7 @@ service q = service {
     resource function mockResource() {
     }
 };
-typedesc r = json;
+typedesc<any> r = json;
 
 type s 1;
 float|boolean t = e;
