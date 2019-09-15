@@ -210,10 +210,11 @@ public class WorkerTest {
         Assert.assertEquals("error: err from panic", ((BError) returns[0]).getReason());
     }
 
-    @Test(enabled = false) // Issue with trap
+    @Test()
     public void receiveWithTrapForDefault() {
         BValue[] returns = BRunUtil.invoke(result, "receiveWithTrapForDefault");
         Assert.assertEquals(returns.length, 1);
+        Assert.assertEquals("error: err from panic", ((BError) returns[0]).getReason());
     }
 
     @Test
@@ -245,7 +246,7 @@ public class WorkerTest {
     }
 
     @Test(expectedExceptions = BLangRuntimeException.class,
-            expectedExceptionsMessageRegExp = ".*error: \\{ballerina\\}FutureAlreadyCancelled.*")
+            expectedExceptionsMessageRegExp = ".*error: \\{ballerina/lang.future\\}FutureAlreadyCancelled.*")
     public void workerWithFutureTest1() {
         BValue[] returns = BRunUtil.invoke(result, "workerWithFutureTest1");
         Assert.assertEquals(returns.length, 1);
@@ -266,7 +267,7 @@ public class WorkerTest {
             Assert.assertEquals(returns.length, 1);
             Assert.assertEquals(((BInteger) returns[0]).intValue(), 18);
         } catch (BLangRuntimeException e) {
-            Assert.assertTrue(e.getMessage().contains("error: {ballerina}FutureAlreadyCancelled"));
+            Assert.assertTrue(e.getMessage().contains("error: {ballerina/lang.future}FutureAlreadyCancelled"));
         }
     }
 

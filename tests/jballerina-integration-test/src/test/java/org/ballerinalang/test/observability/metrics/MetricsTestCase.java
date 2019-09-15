@@ -38,9 +38,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.ballerinalang.jvm.observability.ObservabilityConstants.CONFIG_TABLE_METRICS;
 
 /**
@@ -64,19 +66,18 @@ public class MetricsTestCase extends BaseTest {
         sqlServer = new FileBasedTestDatabase(SQLDBUtils.DBType.H2, dbScriptPath, SQLDBUtils.DB_DIRECTORY, DB_NAME);
         String balFile = new File(RESOURCE_LOCATION + "metrics-test.bal").getAbsolutePath();
         List<String> args = new ArrayList<>();
-        args.add("-e");
-        args.add(ObservabilityConstants.CONFIG_METRICS_ENABLED + "=true");
-        args.add("-e");
-        args.add(CONFIG_TABLE_METRICS + ".statistic.percentiles=0.5, 0.75, 0.98, 0.99, 0.999");
-        serverInstance.startServer(balFile, args.toArray(new String[args.size()]), new int[]{9090});
+        args.add("--" + ObservabilityConstants.CONFIG_METRICS_ENABLED + "=true");
+        args.add("--" + CONFIG_TABLE_METRICS + ".statistic.percentiles=0.5, 0.75, 0.98, 0.99, 0.999");
+        serverInstance.startServer(balFile, null, args.toArray(new String[args.size()]), new int[] { 9090 });
         addMetrics();
     }
 
     @Test
     public void testMetrics() throws Exception {
         // Test Service
-        Assert.assertEquals(HttpClientRequest.doGet("http://localhost:9090/test").getData(),
-                "[{\"PRODUCTID\":1, \"PRODUCTNAME\":\"WSO2-IAM\"}, {\"PRODUCTID\":3, \"PRODUCTNAME\":\"WSO2-EI\"}]");
+        await().atMost(20, TimeUnit.SECONDS)
+                .ignoreExceptions().until(() -> HttpClientRequest.doGet("http://localhost:9090/test")
+                .getData().equals("productId=1 productName=WSO2-IAM productId=3 productName=WSO2-EI"));
 
         // Send some requests
         int i = 0;

@@ -14,13 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
-import ballerina/mime;
 import ballerina/http;
-import ballerina/time;
+import ballerina/io;
+import ballerina/lang.'int as lint;
 import ballerina/math;
-import ballerina/internal;
-import ballerina/'lang\.int as lint;
+import ballerina/time;
 
 # This function searches modules from ballerina central.
 #
@@ -37,12 +35,12 @@ function search (http:Client definedEndpoint, string url, string querySearched, 
         httpResponse = result;
     } else {
         error e = result;
-        io:println("Connection to the remote host failed : " + e.reason());
+        io:println("Connection to the remote host failed : " + <string>e.detail()["message"]);
         return;
     }
     string statusCode = httpResponse.statusCode.toString();
-    if (internal:hasPrefix(statusCode, "5")) {
-        io:println("remote registry failed for url : " + url + "/" + querySearched);
+    if (statusCode.startsWith("5")) {
+        io:println("unable to connect to remote repository: " + url + "/" + querySearched);
     } else if (statusCode != "200") {
         var resp = httpResponse.getJsonPayload();
         if (resp is json) {
@@ -163,7 +161,7 @@ function search (http:Client definedEndpoint, string url, string querySearched, 
 # + username - Username of the proxy
 # + password - Password of the proxy
 # + return - Endpoint defined
-function defineEndpointWithProxy (string url, string hostname, int port, string username, string password) returns http:Client{
+function defineEndpointWithProxy(string url, string hostname, int port, string username, string password) returns http:Client{
     http:Client httpEndpoint = new (url, {
         secureSocket:{
             trustStore:{
@@ -173,7 +171,7 @@ function defineEndpointWithProxy (string url, string hostname, int port, string 
             verifyHostname: false,
             shareSession: true
         },
-        proxy : getProxyConfigurations(hostname, port, username, password)
+        http1Settings:{ proxy : getProxyConfigurations(hostname, port, username, password) }
     });
     return httpEndpoint;
 }
@@ -182,7 +180,7 @@ function defineEndpointWithProxy (string url, string hostname, int port, string 
 #
 # + url - URL to be invoked
 # + return - Endpoint defined
-function defineEndpointWithoutProxy (string url) returns http:Client{
+function defineEndpointWithoutProxy(string url) returns http:Client{
     http:Client httpEndpoint = new (url, {
         secureSocket:{
             trustStore:{

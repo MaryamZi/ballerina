@@ -15,8 +15,7 @@
 // under the License.
 
 import ballerina/crypto;
-import ballerina/io;
-import ballerina/internal;
+import ballerina/time;
 
 ////////////////////////////////
 ///// HTTP Client Endpoint /////
@@ -33,7 +32,7 @@ import ballerina/internal;
 public type Client client object {
 
     public string url;
-    public ClientEndpointConfig config = {};
+    public ClientConfiguration config = {};
     public HttpClient httpClient;
 
     # Gets invoked to initialize the client. During initialization, configurations provided through the `config`
@@ -42,7 +41,7 @@ public type Client client object {
     #
     # + url - URL of the target service
     # + config - The configurations to be used when initializing the client
-    public function __init(string url, ClientEndpointConfig? config = ()) {
+    public function __init(string url, public ClientConfiguration? config = ()) {
         self.config = config ?: {};
         self.url = url;
         var result = initialize(url, self.config);
@@ -224,21 +223,19 @@ public type TargetService record {|
 # + forwarded - The choice of setting `forwarded`/`x-forwarded` header
 # + followRedirects - Configurations associated with Redirection
 # + poolConfig - Configurations associated with request pooling
-# + proxy - Proxy server related options
 # + secureSocket - SSL/TLS related options
 # + cache - HTTP caching related configurations
 # + compression - Specifies the way of handling compression (`accept-encoding`) header
 # + auth - HTTP authentication related configurations
 # + circuitBreaker - Configurations associated with Circuit Breaker behaviour
 # + retryConfig - Configurations associated with Retry
-public type ClientEndpointConfig record {|
+public type ClientConfiguration record {|
     string httpVersion = HTTP_1_1;
     ClientHttp1Settings http1Settings = {};
     ClientHttp2Settings http2Settings = {};
     int timeoutInMillis = 60000;
     string forwarded = "disable";
     FollowRedirects? followRedirects = ();
-    ProxyConfig? proxy = ();
     PoolConfiguration? poolConfig = ();
     ClientSecureSocket? secureSocket = ();
     CacheConfig cache = {};
@@ -252,9 +249,11 @@ public type ClientEndpointConfig record {|
 #
 # + keepAlive - Specifies whether to reuse a connection for multiple requests
 # + chunking - The chunking behaviour of the request
+# + proxy - Proxy server related options
 public type ClientHttp1Settings record {|
     KeepAlive keepAlive = KEEPALIVE_AUTO;
     Chunking chunking = CHUNKING_AUTO;
+    ProxyConfig? proxy = ();
 |};
 
 function createSimpleHttpClient(HttpClient caller, PoolConfiguration globalPoolConfig) = external;
@@ -346,16 +345,16 @@ public type OutboundAuthConfig record {|
     OutboundAuthHandler authHandler;
 |};
 
-function initialize(string serviceUrl, ClientEndpointConfig config) returns HttpClient|error {
+function initialize(string serviceUrl, ClientConfiguration config) returns HttpClient|error {
     boolean httpClientRequired = false;
     string url = serviceUrl;
-    if (internal:hasSuffix(url, "/")) {
+    if (url.endsWith("/")) {
         int lastIndex = url.length() - 1;
         url = url.substring(0, lastIndex);
     }
     var cbConfig = config.circuitBreaker;
     if (cbConfig is CircuitBreakerConfig) {
-        if (internal:hasSuffix(url, "/")) {
+        if (url.endsWith("/")) {
             int lastIndex = url.length() - 1;
             url = url.substring(0, lastIndex);
         }
@@ -374,7 +373,7 @@ function initialize(string serviceUrl, ClientEndpointConfig config) returns Http
     }
 }
 
-function createRedirectClient(string url, ClientEndpointConfig configuration) returns HttpClient|ClientError {
+function createRedirectClient(string url, ClientConfiguration configuration) returns HttpClient|ClientError {
     var redirectConfig = configuration.followRedirects;
     if (redirectConfig is FollowRedirects) {
         if (redirectConfig.enabled) {
@@ -392,7 +391,7 @@ function createRedirectClient(string url, ClientEndpointConfig configuration) re
     }
 }
 
-function checkForRetry(string url, ClientEndpointConfig config) returns HttpClient|ClientError {
+function checkForRetry(string url, ClientConfiguration config) returns HttpClient|ClientError {
     var retryConfigVal = config.retryConfig;
     if (retryConfigVal is RetryConfig) {
         return createRetryClient(url, config);
@@ -405,7 +404,7 @@ function checkForRetry(string url, ClientEndpointConfig config) returns HttpClie
     }
 }
 
-function createCircuitBreakerClient(string uri, ClientEndpointConfig configuration) returns HttpClient|ClientError {
+function createCircuitBreakerClient(string uri, ClientConfiguration configuration) returns HttpClient|ClientError {
     HttpClient cbHttpClient;
     var cbConfig = configuration.circuitBreaker;
     if (cbConfig is CircuitBreakerConfig) {
@@ -462,7 +461,7 @@ function createCircuitBreakerClient(string uri, ClientEndpointConfig configurati
     }
 }
 
-function createRetryClient(string url, ClientEndpointConfig configuration) returns HttpClient|ClientError {
+function createRetryClient(string url, ClientConfiguration configuration) returns HttpClient|ClientError {
     var retryConfig = configuration.retryConfig;
     if (retryConfig is RetryConfig) {
         boolean[] statusCodes = populateErrorCodeIndex(retryConfig.statusCodes);

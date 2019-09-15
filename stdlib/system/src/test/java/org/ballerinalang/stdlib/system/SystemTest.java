@@ -56,14 +56,6 @@ public class SystemTest {
     }
 
     @Test
-    public void testGetCurrentDirectory() {
-        BValue[] returns = BRunUtil.invoke(compileResult, "testGetCurrentDirectory");
-        Assert.assertTrue(returns[0] instanceof BString);
-        String expectedValue = System.getProperty("user.dir");
-        Assert.assertEquals(returns[0].stringValue(), expectedValue);
-    }
-
-    @Test
     public void testGetUserHome() {
         BValue[] returns = BRunUtil.invoke(compileResult, "testGetUserHome");
         Assert.assertTrue(returns[0] instanceof BString);
@@ -72,7 +64,7 @@ public class SystemTest {
     }
 
     @Test
-    public void testGetUserame() {
+    public void testGetUsername() {
         BValue[] returns = BRunUtil.invoke(compileResult, "testGetUsername");
         Assert.assertTrue(returns[0] instanceof BString);
         String expectedValue = System.getProperty("user.name");
@@ -86,7 +78,7 @@ public class SystemTest {
                 "Invalid return value");
     }
     
-    @Test (enabled = true)
+    @Test
     public void testExecInUnixLike1() {
         if (SystemUtils.IS_OS_UNIX) {
             BValue[] returns = BRunUtil.invoke(compileResult, "testExecInUnixLike1");
@@ -96,7 +88,7 @@ public class SystemTest {
         }
     }
     
-    @Test (enabled = true)
+    @Test
     public void testExecInUnixLike2() {
         if (SystemUtils.IS_OS_UNIX) {
             BValue[] returns = BRunUtil.invoke(compileResult, "testExecInUnixLike2");
@@ -104,7 +96,7 @@ public class SystemTest {
         }
     }
     
-    @Test (enabled = true)
+    @Test
     public void testExecInUnixLike3() {
         if (SystemUtils.IS_OS_UNIX) {
             BValue[] returns = BRunUtil.invoke(compileResult, "testExecInUnixLike3");
@@ -112,7 +104,7 @@ public class SystemTest {
         }
     }
     
-    @Test (enabled = false)
+    @Test
     public void testExecInUnixLike4() {
         if (SystemUtils.IS_OS_UNIX) {
             BValue[] returns = BRunUtil.invoke(compileResult, "testExecInUnixLike4");

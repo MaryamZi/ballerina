@@ -15,13 +15,13 @@
 // under the License.
 
 import ballerina/crypto;
-import ballerina/'lang\.object as lang;
+import ballerina/lang.'object as lang;
 
 # Represents server listener where one or more services can be registered. so that ballerina program can offer
 # service through this listener.
 public type Listener object {
 
-    *lang:AbstractListener;
+    *lang:Listener;
 
     private int port = 0;
     private ListenerConfiguration config = {};
@@ -51,6 +51,9 @@ public type Listener object {
     # + return - Returns an error if encounters an error while attaching the service, returns nil otherwise.
     public function __attach(service s, string? name = ()) returns error? {
         return self.register(s, name);
+    }
+
+    public function __detach(service s) returns error? {
     }
 
     # Gets called when the endpoint is being initialize during module init time.
@@ -85,13 +88,11 @@ const int DEFAULT_LISTENER_TIMEOUT = 120000; //2 mins
 #
 # + host - The server hostname.
 # + secureSocket - The SSL configurations for the client endpoint.
-# + httpVersion - HTTP version supported by the endpoint. This should be 2.0 as gRPC works only with HTTP/2.
 # + timeoutInMillis - Period of time in milliseconds that a connection waits for a read/write operation. Use value 0 to
 #                   disable timeout.
 public type ListenerConfiguration record {|
     string host = "0.0.0.0";
     ListenerSecureSocket? secureSocket = ();
-    string httpVersion = "2.0";
     int timeoutInMillis = DEFAULT_LISTENER_TIMEOUT;
 |};
 

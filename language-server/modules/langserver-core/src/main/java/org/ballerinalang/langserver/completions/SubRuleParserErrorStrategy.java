@@ -68,7 +68,10 @@ public class SubRuleParserErrorStrategy extends DefaultErrorStrategy {
                 || parserRuleContext instanceof BallerinaParser.PackageNameContext
                 || parserRuleContext instanceof BallerinaParser.TypeNameContext
                 || parserRuleContext instanceof BallerinaParser.TypeInitExprContext
-                || parserRuleContext instanceof BallerinaParser.PeerWorkerContext) {
+                || parserRuleContext instanceof BallerinaParser.PeerWorkerContext
+                || parserRuleContext instanceof BallerinaParser.ConstantExpressionContext
+                || parserRuleContext instanceof BallerinaParser.SimpleVariableReferenceContext
+                || parserRuleContext instanceof BallerinaParser.VariableReferenceExpressionContext) {
             this.fillContext(parserRuleContext.getParent());
         } else {
             this.context.put(CompletionKeys.PARSER_RULE_CONTEXT_KEY, parserRuleContext);

@@ -1757,14 +1757,16 @@ public class TaintAnalyzer extends BLangNodeVisitor {
         }
 
         if (varNode.getKind() == NodeKind.TUPLE_VARIABLE) {
-            ((BLangTupleVariable) varNode).memberVariables
-                    .forEach(variable -> setTaintedStatus(variable, taintedStatus));
+            for (BLangVariable variable : ((BLangTupleVariable) varNode).memberVariables) {
+                setTaintedStatus(variable, taintedStatus);
+            }
             return;
         }
 
         if (varNode.getKind() == NodeKind.VARIABLE) {
             BLangSimpleVariable simpleVarNode = (BLangSimpleVariable) varNode;
-            if (taintedStatus != TaintedStatus.IGNORED && (overridingAnalysis || !simpleVarNode.symbol.tainted)) {
+            boolean isTaintedVar = simpleVarNode.symbol != null && !simpleVarNode.symbol.tainted;
+            if (taintedStatus != TaintedStatus.IGNORED && (overridingAnalysis || isTaintedVar)) {
                 setTaintedStatus(simpleVarNode.symbol, taintedStatus);
             }
         }
@@ -1872,8 +1874,7 @@ public class TaintAnalyzer extends BLangNodeVisitor {
      * @return if the invocation is blocked due to an unanalyzed invocation
      */
     private boolean visitInvokable(BLangInvokableNode invNode, SymbolEnv symbolEnv) {
-        if (analyzerPhase == AnalyzerPhase.LOOPS_RESOLVED_ANALYSIS || invNode.symbol.taintTable == null
-                || (invNode.getKind() == NodeKind.FUNCTION && ((BLangFunction) invNode).attachedOuterFunction)) {
+        if (analyzerPhase == AnalyzerPhase.LOOPS_RESOLVED_ANALYSIS || invNode.symbol.taintTable == null) {
             if (Symbols.isNative(invNode.symbol)
                     || (invNode.getKind() == NodeKind.FUNCTION && ((BLangFunction) invNode).interfaceFunction)) {
                 attachNativeFunctionTaintTable(invNode);

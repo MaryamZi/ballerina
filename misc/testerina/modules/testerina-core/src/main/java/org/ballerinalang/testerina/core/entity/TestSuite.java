@@ -19,8 +19,7 @@
 package org.ballerinalang.testerina.core.entity;
 
 import org.ballerinalang.jvm.scheduling.Scheduler;
-import org.ballerinalang.util.JBallerinaInMemoryClassLoader;
-import org.ballerinalang.util.codegen.FunctionInfo;
+import org.ballerinalang.testerina.util.TestarinaClassLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,14 +37,18 @@ public class TestSuite {
     private TesterinaFunction initFunction;
     private TesterinaFunction startFunction;
     private TesterinaFunction stopFunction;
+    private TesterinaFunction testInitFunction;
+    private TesterinaFunction testStartFunction;
+    private TesterinaFunction testStopFunction;
     private List<Test> tests = new ArrayList<>();
-    private JBallerinaInMemoryClassLoader programFile;
+    private TestarinaClassLoader programFile;
     private List<String> beforeSuiteFunctionNames = new ArrayList<>();
     private List<String> afterSuiteFunctionNames = new ArrayList<>();
 
-    // We will use one scheduler for the entire test suite
-    // By default we will set it as false.
+    // We will use one scheduler to start the module and let it spin
+    // Then we will use a second scheduler to run the test function
     public final Scheduler scheduler = new Scheduler(4, false);
+    public final Scheduler initScheduler = new Scheduler(4, false);
 
     public List<String> getBeforeSuiteFunctionNames() {
         return beforeSuiteFunctionNames;
@@ -98,16 +101,6 @@ public class TestSuite {
      */
     private Map<String, TesterinaFunction> mockFunctionsMap = new HashMap<>();
 
-    /**
-     * Key - unique identifier for the function to be mocked.
-     * Value - real function.
-     */
-    private Map<String, FunctionInfo> mockedRealFunctionsMap = new HashMap<>();
-
-    public Map<String, FunctionInfo> getMockedRealFunctionsMap() {
-        return mockedRealFunctionsMap;
-    }
-
     public Map<String, String> getMockFunctionNamesMap() {
         return mockFunctionNamesMap;
     }
@@ -128,7 +121,7 @@ public class TestSuite {
         this.suiteName = suiteName;
     }
 
-    public JBallerinaInMemoryClassLoader getProgramFile() {
+    public TestarinaClassLoader getProgramFile() {
         return programFile;
     }
 
@@ -227,10 +220,6 @@ public class TestSuite {
         this.mockFunctionNamesMap.put(id, function);
     }
 
-    public void addMockedRealFunction(String id, FunctionInfo function) {
-        this.mockedRealFunctionsMap.put(id, function);
-    }
-
     public void addMockFunctionObj(String id, TesterinaFunction function) {
         this.mockFunctionsMap.put(id, function);
     }
@@ -259,7 +248,7 @@ public class TestSuite {
         this.afterSuiteFunctions = afterSuiteFunctions;
     }
 
-    public void setProgramFile(JBallerinaInMemoryClassLoader programFile) {
+    public void setProgramFile(TestarinaClassLoader programFile) {
         this.programFile = programFile;
     }
 
@@ -275,6 +264,31 @@ public class TestSuite {
         return stopFunction;
     }
 
+
+    public TesterinaFunction getTestInitFunction() {
+        return testInitFunction;
+    }
+
+    public void setTestInitFunction(TesterinaFunction testInitFunction) {
+        this.testInitFunction = testInitFunction;
+    }
+
+    public TesterinaFunction getTestStartFunction() {
+        return testStartFunction;
+    }
+
+    public void setTestStartFunction(TesterinaFunction testStartFunction) {
+        this.testStartFunction = testStartFunction;
+    }
+
+    public TesterinaFunction getTestStopFunction() {
+        return testStopFunction;
+    }
+
+    public void setTestStopFunction(TesterinaFunction testStopFunction) {
+        this.testStopFunction = testStopFunction;
+    }
+
     public void setStopFunction(TesterinaFunction stopFunction) {
         this.stopFunction = stopFunction;
         this.stopFunction.scheduler = this.scheduler;
@@ -283,17 +297,49 @@ public class TestSuite {
 
     public void start() {
         if (initFunction != null && startFunction != null) {
+            // As the init function we need to use $moduleInit to initialize all the dependent modules
+            // properly.
+            initFunction.bFunction.name.value = "$moduleInit";
+            initFunction.scheduler = initScheduler;
             initFunction.invoke();
-            startFunction.immortal = true;
+            // Now we initialize the init of testable module.
+            if (testInitFunction != null) {
+                testInitFunction.scheduler = initScheduler;
+                testInitFunction.invoke();
+            }
+            // As the start function we need to use $moduleStart to start all the dependent modules
+            // properly.
+            startFunction.bFunction.name.value = "$moduleStart";
+            startFunction.scheduler = initScheduler;
             startFunction.invoke();
+
+            // Invoke start function of the testable module
+            if (testStartFunction != null) {
+                testStartFunction.scheduler = initScheduler;
+                testStartFunction.invoke();
+            }
+
+            // Once the start function finish we will re start the scheduler with immortal true
+            initScheduler.immortal = true;
+            Thread immortalThread = new Thread(() -> {
+                initScheduler.start();
+            }, "module-start");
+            immortalThread.setDaemon(true);
+            immortalThread.start();
         }
     }
 
     public void stop() {
         if (stopFunction != null) {
-            stopFunction.invoke();
+            // Invoke stop function of the testable module.
+            if (testStopFunction != null) {
+                testStopFunction.scheduler = scheduler;
+                testStopFunction.invoke();
+            }
+
+            stopFunction.bFunction.name.value = "$moduleStop";
+            stopFunction.directInvoke(new Class[]{});
         }
-        // poison the scheduler to stop all jobs.
-        this.scheduler.poison();
+        // this.initScheduler.poison();
     }
 }

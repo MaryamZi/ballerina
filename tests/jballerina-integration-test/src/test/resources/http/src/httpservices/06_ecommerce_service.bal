@@ -15,9 +15,8 @@
 // under the License.
 
 import ballerina/io;
-import ballerina/mime;
 import ballerina/http;
-import ballerina/internal;
+import ballerina/stringutils;
 
 listener http:Listener serviceEndpoint5 = new(9095);
 
@@ -32,7 +31,7 @@ service CustomerMgtService on serviceEndpoint5 {
     resource function customers(http:Caller caller, http:Request req) {
         json payload = {};
         string httpMethod = req.method;
-        if (internal:equalsIgnoreCase(httpMethod, "GET")) {
+        if (stringutils:equalsIgnoreCase(httpMethod, "GET")) {
             payload = {"Customer":{"ID":"987654", "Name":"ABC PQR", "Description":"Sample Customer."}};
         } else {
             payload = {"Status":"Customer is successfully added."};
@@ -157,7 +156,7 @@ service OrderMgtService on serviceEndpoint5 {
     resource function orders(http:Caller caller, http:Request req) {
         json payload = {};
         string httpMethod = req.method;
-        if (internal:equalsIgnoreCase(httpMethod, "GET")) {
+        if (stringutils:equalsIgnoreCase(httpMethod, "GET")) {
             payload = {"Order":{"ID":"111999", "Name":"ABC123", "Description":"Sample order."}};
         } else {
             payload = {"Status":"Order is successfully added."};

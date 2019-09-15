@@ -29,6 +29,29 @@
       ]
     },
     {
+      "label": "ballerinax/java",
+      "kind": "Module",
+      "detail": "Package",
+      "sortText": "140",
+      "insertText": "java",
+      "insertTextFormat": "Snippet",
+      "additionalTextEdits": [
+        {
+          "range": {
+            "start": {
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "line": 0,
+              "character": 0
+            }
+          },
+          "newText": "import ballerinax/java;\n"
+        }
+      ]
+    },
+    {
       "label": "ballerina/lang.object",
       "kind": "Module",
       "detail": "Package",
@@ -140,6 +163,29 @@
             }
           },
           "newText": "import ballerina/lang.'array;\n"
+        }
+      ]
+    },
+    {
+      "label": "ballerina/stringutils",
+      "kind": "Module",
+      "detail": "Package",
+      "sortText": "140",
+      "insertText": "stringutils",
+      "insertTextFormat": "Snippet",
+      "additionalTextEdits": [
+        {
+          "range": {
+            "start": {
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "line": 0,
+              "character": 0
+            }
+          },
+          "newText": "import ballerina/stringutils;\n"
         }
       ]
     },
@@ -462,29 +508,6 @@
             }
           },
           "newText": "import ballerina/oauth2;\n"
-        }
-      ]
-    },
-    {
-      "label": "ballerina/internal",
-      "kind": "Module",
-      "detail": "Package",
-      "sortText": "140",
-      "insertText": "internal",
-      "insertTextFormat": "Snippet",
-      "additionalTextEdits": [
-        {
-          "range": {
-            "start": {
-              "line": 0,
-              "character": 0
-            },
-            "end": {
-              "line": 0,
-              "character": 0
-            }
-          },
-          "newText": "import ballerina/internal;\n"
         }
       ]
     },
@@ -1090,31 +1113,55 @@
       "label": "check",
       "kind": "Keyword",
       "detail": "Keyword",
-      "sortText": "210",
+      "sortText": "220",
       "insertText": "check ",
+      "insertTextFormat": "Snippet"
+    },
+    {
+      "label": "checkpanic",
+      "kind": "Keyword",
+      "detail": "Keyword",
+      "sortText": "220",
+      "insertText": "checkpanic ",
       "insertTextFormat": "Snippet"
     },
     {
       "label": "wait",
       "kind": "Keyword",
       "detail": "Keyword",
-      "sortText": "210",
+      "sortText": "220",
       "insertText": "wait ",
       "insertTextFormat": "Snippet"
     },
     {
-      "label": "untaint",
+      "label": "start",
       "kind": "Keyword",
       "detail": "Keyword",
-      "sortText": "210",
-      "insertText": "untiant ",
+      "sortText": "220",
+      "insertText": "start ",
+      "insertTextFormat": "Snippet"
+    },
+    {
+      "label": "flush",
+      "kind": "Keyword",
+      "detail": "Keyword",
+      "sortText": "220",
+      "insertText": "flush ",
+      "insertTextFormat": "Snippet"
+    },
+    {
+      "label": "untainted",
+      "kind": "Keyword",
+      "detail": "Keyword",
+      "sortText": "220",
+      "insertText": "untainted ",
       "insertTextFormat": "Snippet"
     },
     {
       "label": "but",
       "kind": "Snippet",
       "detail": "Statement",
-      "sortText": "200",
+      "sortText": "240",
       "insertText": "but {\n\t${1}\n};",
       "insertTextFormat": "Snippet"
     },
@@ -1122,7 +1169,7 @@
       "label": "trap",
       "kind": "Snippet",
       "detail": "Snippet",
-      "sortText": "110",
+      "sortText": "240",
       "insertText": "trap ",
       "insertTextFormat": "Snippet"
     },
@@ -1130,7 +1177,7 @@
       "label": "new()",
       "kind": "Function",
       "detail": "Function",
-      "sortText": "130",
+      "sortText": "120",
       "insertText": "new();",
       "insertTextFormat": "Snippet"
     },
@@ -1138,7 +1185,7 @@
       "label": "Listener2()",
       "kind": "Function",
       "detail": "Function",
-      "sortText": "130",
+      "sortText": "120",
       "insertText": "Listener2();",
       "insertTextFormat": "Snippet"
     }

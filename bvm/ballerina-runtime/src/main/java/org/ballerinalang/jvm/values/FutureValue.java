@@ -18,18 +18,24 @@
  package org.ballerinalang.jvm.values;
 
  import org.ballerinalang.jvm.scheduling.Strand;
+ import org.ballerinalang.jvm.transactions.TransactionLocalContext;
+ import org.ballerinalang.jvm.types.BFutureType;
  import org.ballerinalang.jvm.types.BType;
- import org.ballerinalang.jvm.types.BTypes;
  import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
 
  import java.util.Map;
  import java.util.StringJoiner;
 
- /**
-  * Represent a Ballerina future in Java.
-  *
-  * @since 0.995.0
-  */
+/**
+ * <p>
+ * Represent a Ballerina future in Java.
+ * </p>
+ * <p>
+ * <i>Note: This is an internal API and may change in future versions.</i>
+ * </p>
+ * 
+ * @since 0.995.0
+ */
  public class FutureValue implements RefValue {
 
      public Strand strand;
@@ -42,13 +48,18 @@
 
      public CallableUnitCallback callback;
 
-     public FutureValue(Strand strand, CallableUnitCallback callback) {
+     public TransactionLocalContext transactionLocalContext;
+
+     BType type;
+
+     public FutureValue(Strand strand, CallableUnitCallback callback, BType constraint) {
          this.strand = strand;
          this.callback = callback;
+         this.type = new BFutureType(constraint);
      }
 
      @Override
-     public String stringValue() {
+     public String stringValue(Strand strand) {
          StringJoiner sj = new StringJoiner(",", "{", "}");
          sj.add("isDone:" + isDone);
          if (isDone) {
@@ -62,7 +73,7 @@
 
      @Override
      public BType getType() {
-         return BTypes.typeFuture;
+         return this.type;
      }
 
      @Override

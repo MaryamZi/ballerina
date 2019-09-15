@@ -82,6 +82,9 @@ public class XMLLiteralTest {
                                   "incompatible types: expected '(int|float|decimal|string|boolean)', found 'xml'",
                                   28, 51);
 
+        // namespace conflict with block scope namespace
+        BAssertUtil.validateError(negativeResult, index++, "redeclared symbol 'ns0'", 37, 46);
+
         // namespace conflict with package import
         BAssertUtil.validateError(negativeResult, index++, "redeclared symbol 'x'", 42, 5);
 
@@ -104,7 +107,7 @@ public class XMLLiteralTest {
 
         // XML elements with mismatching start and end tags
         BAssertUtil.validateError(negativeResult, index++, "mismatching start and end tags found in xml element",
-                                  73, 19);
+                                  73, 18);
     }
 
     @Test

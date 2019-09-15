@@ -17,10 +17,11 @@
 import ballerina/cache;
 import ballerina/crypto;
 import ballerina/encoding;
-import ballerina/internal;
 import ballerina/io;
+import ballerina/lang.'int as langint;
+import ballerina/lang.'string as strings;
+import ballerina/stringutils;
 import ballerina/time;
-import ballerina/'lang\.int as langint;
 
 # Represents JWT validator configurations.
 # + issuer - Expected issuer
@@ -54,58 +55,45 @@ public type CachedJwt record {|
     int expiryTime;
 |};
 
-# Validity given JWT string.
+# Validate the given JWT string.
 #
-# + jwtToken - JWT token that need to validate
+# + jwtToken - JWT token that needs to be validated
 # + config - JWT validator config record
-# + return - If JWT token is valied return the JWT payload. An `Error` if token validation fails.
+# + return - If the JWT token is valid, return the JWT payload. Else, return an `Error` if token validation fails.
 public function validateJwt(string jwtToken, JwtValidatorConfig config) returns @tainted (JwtPayload|Error) {
-    string[] encodedJWTComponents = [];
-    var jwtComponents = getJWTComponents(jwtToken);
-    if (jwtComponents is string[]) {
-        encodedJWTComponents = jwtComponents;
-    } else {
-        return jwtComponents;
-    }
+    JwtHeader header;
+    JwtPayload payload;
+    [header, payload]  = check decodeJwt(jwtToken);
 
-    string[] aud = [];
-    JwtHeader header = {};
-    JwtPayload payload = {};
-    var decodedJwt = parseJWT(encodedJWTComponents);
-    if (decodedJwt is [JwtHeader, JwtPayload]) {
-        [header, payload] = decodedJwt;
+    var jwtValidity = validateJwtRecords(jwtToken, header, payload, config);
+    if (jwtValidity is ()) {
+        return payload;
     } else {
-        return decodedJwt;
-    }
-
-    var jwtValidity = validateJwtRecords(encodedJWTComponents, header, payload, config);
-    if (jwtValidity is Error) {
         return jwtValidity;
-    } else {
-        if (jwtValidity) {
-            return payload;
-        } else {
-            return prepareError("Invalid JWT token.");
-        }
     }
 }
 
-function getJWTComponents(string jwtToken) returns string[]|Error {
-    string[] jwtComponents = internal:split(jwtToken, "\\.");
+function getJwtComponents(string jwtToken) returns string[]|Error {
+    string[] jwtComponents = stringutils:split(jwtToken, "\\.");
     if (jwtComponents.length() < 2 || jwtComponents.length() > 3) {
         return prepareError("Invalid JWT token.");
     }
     return jwtComponents;
 }
 
-function parseJWT(string[] encodedJWTComponents) returns @tainted ([JwtHeader, JwtPayload]|Error) {
-    map<json> headerJson = {};
-    map<json> payloadJson = {};
-    var decodedJWTComponents = getDecodedJWTComponents(encodedJWTComponents);
-    if (decodedJWTComponents is [map<json>, map<json>]) {
-        [headerJson, payloadJson] = decodedJWTComponents;
+# Decode the given JWT string.
+#
+# + jwtToken - JWT token that needs to be decoded
+# + return - The JWT header and payload tuple or an `Error` if token decoding fails.
+public function decodeJwt(string jwtToken) returns @tainted ([JwtHeader, JwtPayload]|Error) {
+    string[] encodedJwtComponents = check getJwtComponents(jwtToken);
+    map<json> headerJson;
+    map<json> payloadJson;
+    var decodedJwtComponents = getDecodedJwtComponents(encodedJwtComponents);
+    if (decodedJwtComponents is [map<json>, map<json>]) {
+        [headerJson, payloadJson] = decodedJwtComponents;
     } else {
-        return decodedJWTComponents;
+        return decodedJwtComponents;
     }
 
     JwtHeader jwtHeader = parseHeader(headerJson);
@@ -113,26 +101,26 @@ function parseJWT(string[] encodedJWTComponents) returns @tainted ([JwtHeader, J
     return [jwtHeader, jwtPayload];
 }
 
-function getDecodedJWTComponents(string[] encodedJWTComponents) returns @tainted ([map<json>, map<json>]|Error) {
-    string jwtHeader = "";
-    string jwtPayload = "";
+function getDecodedJwtComponents(string[] encodedJwtComponents) returns @tainted ([map<json>, map<json>]|Error) {
+    string jwtHeader;
+    string jwtPayload;
 
-    var decodeResult = encoding:decodeBase64Url(encodedJWTComponents[0]);
+    var decodeResult = encoding:decodeBase64Url(encodedJwtComponents[0]);
     if (decodeResult is byte[]) {
-        jwtHeader = encoding:byteArrayToString(decodeResult);
+        jwtHeader = check strings:fromBytes(decodeResult);
     } else {
         return prepareError("Base64 url decode failed for JWT header.", decodeResult);
     }
 
-    decodeResult = encoding:decodeBase64Url(encodedJWTComponents[1]);
+    decodeResult = encoding:decodeBase64Url(encodedJwtComponents[1]);
     if (decodeResult is byte[]) {
-        jwtPayload = encoding:byteArrayToString(decodeResult);
+        jwtPayload = check strings:fromBytes(decodeResult);
     } else {
         return prepareError("Base64 url decode failed for JWT payload.", decodeResult);
     }
 
-    json jwtHeaderJson = {};
-    json jwtPayloadJson = {};
+    json jwtHeaderJson;
+    json jwtPayloadJson;
 
     io:StringReader reader = new(jwtHeader);
     var jsonHeader = reader.readJson();
@@ -157,40 +145,39 @@ function parseHeader(map<json> jwtHeaderJson) returns JwtHeader {
     string[] keys = jwtHeaderJson.keys();
     foreach var key in keys {
         if (key == ALG) {
-            if (jwtHeaderJson[key].toString() == "RS256") {
+            if (jwtHeaderJson[key].toJsonString() == "RS256") {
                 jwtHeader.alg = RS256;
-            } else if (jwtHeaderJson[key].toString() == "RS384") {
+            } else if (jwtHeaderJson[key].toJsonString() == "RS384") {
                 jwtHeader.alg = RS384;
-            } else if (jwtHeaderJson[key].toString() == "RS512") {
+            } else if (jwtHeaderJson[key].toJsonString() == "RS512") {
                 jwtHeader.alg = RS512;
             }
         } else if (key == TYP) {
-            jwtHeader.typ = jwtHeaderJson[key].toString();
+            jwtHeader.typ = jwtHeaderJson[key].toJsonString();
         } else if (key == CTY) {
-            jwtHeader.cty = jwtHeaderJson[key].toString();
+            jwtHeader.cty = jwtHeaderJson[key].toJsonString();
         } else if (key == KID) {
-            jwtHeader.kid = jwtHeaderJson[key].toString();
+            jwtHeader.kid = jwtHeaderJson[key].toJsonString();
         }
     }
     return jwtHeader;
 }
 
 function parsePayload(map<json> jwtPayloadJson) returns JwtPayload|Error {
-    string[] aud = [];
     JwtPayload jwtPayload = {};
     map<json> customClaims = {};
     string[] keys = jwtPayloadJson.keys();
     foreach var key in keys {
         if (key == ISS) {
-            jwtPayload.iss = jwtPayloadJson[key].toString();
+            jwtPayload.iss = jwtPayloadJson[key].toJsonString();
         } else if (key == SUB) {
-            jwtPayload.sub = jwtPayloadJson[key].toString();
+            jwtPayload.sub = jwtPayloadJson[key].toJsonString();
         } else if (key == AUD) {
             jwtPayload.aud = check convertToStringArray(jwtPayloadJson[key]);
         } else if (key == JTI) {
-            jwtPayload.jti = jwtPayloadJson[key].toString();
+            jwtPayload.jti = jwtPayloadJson[key].toJsonString();
         } else if (key == EXP) {
-            string exp = jwtPayloadJson[key].toString();
+            string exp = jwtPayloadJson[key].toJsonString();
             var value = langint:fromString(exp);
             if (value is int) {
                 jwtPayload.exp = value;
@@ -198,7 +185,7 @@ function parsePayload(map<json> jwtPayloadJson) returns JwtPayload|Error {
                 jwtPayload.exp = 0;
             }
         } else if (key == NBF) {
-            string nbf = jwtPayloadJson[key].toString();
+            string nbf = jwtPayloadJson[key].toJsonString();
             var value = langint:fromString(nbf);
             if (value is int) {
                 jwtPayload.nbf = value;
@@ -206,7 +193,7 @@ function parsePayload(map<json> jwtPayloadJson) returns JwtPayload|Error {
                 jwtPayload.nbf = 0;
             }
         } else if (key == IAT) {
-            string iat = jwtPayloadJson[key].toString();
+            string iat = jwtPayloadJson[key].toJsonString();
             var value = langint:fromString(iat);
             if (value is int) {
                 jwtPayload.iat = value;
@@ -221,8 +208,8 @@ function parsePayload(map<json> jwtPayloadJson) returns JwtPayload|Error {
     return jwtPayload;
 }
 
-function validateJwtRecords(string[] encodedJWTComponents, JwtHeader jwtHeader, JwtPayload jwtPayload,
-                            JwtValidatorConfig config) returns boolean|Error {
+function validateJwtRecords(string jwtToken, JwtHeader jwtHeader, JwtPayload jwtPayload,
+                            JwtValidatorConfig config) returns Error? {
     if (!validateMandatoryJwtHeaderFields(jwtHeader)) {
         return prepareError("Mandatory field signing algorithm(alg) is empty in the given JWT.");
     }
@@ -231,7 +218,7 @@ function validateJwtRecords(string[] encodedJWTComponents, JwtHeader jwtHeader, 
         if (!check validateCertificate(trustStoreConfig)) {
             return prepareError("Public key certificate validity period has passed.");
         }
-        var signatureValidationResult = validateSignature(encodedJWTComponents, jwtHeader, trustStoreConfig);
+        var signatureValidationResult = validateSignature(jwtToken, jwtHeader, trustStoreConfig);
         if (signatureValidationResult is Error) {
             return signatureValidationResult;
         }
@@ -263,7 +250,7 @@ function validateJwtRecords(string[] encodedJWTComponents, JwtHeader jwtHeader, 
         }
     }
     //TODO : Need to validate jwt id (jti) and custom claims.
-    return true;
+    return ();
 }
 
 function validateMandatoryJwtHeaderFields(JwtHeader jwtHeader) returns boolean {
@@ -283,7 +270,7 @@ function validateCertificate(JwtTrustStoreConfig trustStoreConfig) returns boole
         time:Time currTimeInGmt = check time:toTimeZone(time:currentTime(), "GMT");
         int currTimeInGmtMillis = currTimeInGmt.time;
 
-        var certificate = publicKey.certificate;
+        var certificate = publicKey?.certificate;
         if (certificate is crypto:Certificate) {
             int notBefore = certificate.notBefore.time;
             int notAfter = certificate.notAfter.time;
@@ -297,7 +284,7 @@ function validateCertificate(JwtTrustStoreConfig trustStoreConfig) returns boole
     }
 }
 
-function validateSignature(string[] encodedJWTComponents, JwtHeader jwtHeader, JwtTrustStoreConfig trustStoreConfig)
+function validateSignature(string jwtToken, JwtHeader jwtHeader, JwtTrustStoreConfig trustStoreConfig)
                            returns boolean|Error {
     JwtSigningAlgorithm? alg = jwtHeader?.alg;
     if (alg is ()) {
@@ -306,11 +293,12 @@ function validateSignature(string[] encodedJWTComponents, JwtHeader jwtHeader, J
     if (alg == NONE) {
         return prepareError("Not a valid JWS. Signature algorithm is NONE.");
     } else {
-        if (encodedJWTComponents.length() == 2) {
+        string[] encodedJwtComponents = check getJwtComponents(jwtToken);
+        if (encodedJwtComponents.length() == 2) {
             return prepareError("Not a valid JWS. Signature is required.");
         } else {
-            string assertion = encodedJWTComponents[0] + "." + encodedJWTComponents[1];
-            var signPart = encoding:decodeBase64Url(encodedJWTComponents[2]);
+            string assertion = encodedJwtComponents[0] + "." + encodedJwtComponents[1];
+            var signPart = encoding:decodeBase64Url(encodedJwtComponents[2]);
             if (signPart is byte[]) {
                 var publicKey = crypto:decodePublicKey(trustStoreConfig.trustStore , trustStoreConfig.certificateAlias);
                 if (publicKey is crypto:PublicKey) {
@@ -414,11 +402,11 @@ function convertToStringArray(json jsonData) returns string[]|Error {
         string[] values = [];
         int i = 0;
         foreach json jsonVal in jsonData {
-            values[i] = jsonVal.toString();
+            values[i] = jsonVal.toJsonString();
             i = i + 1;
         }
         return values;
     } else {
-        return [jsonData.toString()];
+        return [jsonData.toJsonString()];
     }
 }

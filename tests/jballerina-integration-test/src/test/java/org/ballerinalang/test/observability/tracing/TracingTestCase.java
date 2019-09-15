@@ -61,8 +61,12 @@ public class TracingTestCase extends BaseTest {
         int[] requiredPorts = new int[]{9090, 9091, 9092, 9093};
         serverInstance = new BServerInstance(balServer);
 
+        copyFile(new File(System.getProperty(TEST_NATIVES_JAR)),  Paths.get(Paths.get(System.getProperty
+                (TEST_NATIVES_JAR)).getParent() +  File.separator + TEST_NATIVES_JAR).toFile());
+
         copyFile(new File(System.getProperty(TEST_NATIVES_JAR)), new File(serverInstance.getServerHome()
                 + DEST_FUNCTIONS_JAR));
+        
 
         // copy to bre/libs
         Path observeTestBaloPath =
@@ -85,8 +89,8 @@ public class TracingTestCase extends BaseTest {
                 "observability" + File.separator + "tracing").getAbsolutePath();
 
         String configFile = new File(RESOURCE_LOCATION + "ballerina.conf").getAbsolutePath();
-        String[] args = new String[]{"--config", configFile};
-        serverInstance.startServer(basePath, "tracingservices", args, requiredPorts);
+        String[] args = new String[] { "--b7a.config.file=" + configFile };
+        serverInstance.startServer(basePath, "tracingservices", null, args, requiredPorts);
     }
 
     @AfterGroups(value = "tracing-test", alwaysRun = true)

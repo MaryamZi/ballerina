@@ -14,12 +14,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/io;
+import ballerina/jvm;
+import ballerina/bir;
+import ballerinax/java;
+
 type ErrorHandlerGenerator object {
     jvm:MethodVisitor mv;
     BalToJVMIndexMap indexMap;
     string currentPackageName;
 
-    public function __init(jvm:MethodVisitor mv, BalToJVMIndexMap indexMap, string currentPackageName) {
+    function __init(jvm:MethodVisitor mv, BalToJVMIndexMap indexMap, string currentPackageName) {
         self.mv = mv;
         self.indexMap = indexMap;
         self.currentPackageName = currentPackageName;
@@ -119,12 +124,44 @@ type DiagnosticLogger object {
                 pkgIdStr = orgName + ":" + moduleName;
             }
 
-            string positionStr = io:sprintf("%s:%s:%s:%s", pkgIdStr, fileName, log.pos.sLine, log.pos.sCol);
-            string errorStr = io:sprintf("error: %s: %s %s", positionStr, log.err.reason(), log.err.detail());
-            io:println(errorStr);
+            string positionStr;
+            if (fileName == ".") {
+                positionStr = io:sprintf("%s:%s:%s", pkgIdStr, log.pos.sLine, log.pos.sCol);
+            } else {
+                positionStr = io:sprintf("%s:%s:%s:%s", pkgIdStr, fileName, log.pos.sLine, log.pos.sCol);
+            }
+
+            string errorStr;
+            string detail = log.err.detail().toString();
+            if (detail == "") {
+                errorStr = io:sprintf("error: %s: %s", positionStr, log.err.reason());
+            } else {
+                errorStr = io:sprintf("error: %s: %s %s", positionStr, log.err.reason(), detail);
+            }
+            print(errorStr);
         }
     }
 };
+
+function print(string message) {
+    handle errStream = getSystemErrorStream();
+    printToErrorStream(errStream, message);
+}
+
+public function getSystemErrorStream() returns handle = @java:FieldGet {
+    name:"err",
+    class:"java/lang/System"
+} external;
+
+public function printToErrorStream(handle receiver, string message) = @java:Method {
+    name:"println",
+    class:"java/io/PrintStream",
+    paramTypes:["java.lang.String"]
+} external;
+
+public function exit(int status) = @java:Method {
+    class:"java/lang/System"
+} external;
 
 type DiagnosticLog record {|
     error err;

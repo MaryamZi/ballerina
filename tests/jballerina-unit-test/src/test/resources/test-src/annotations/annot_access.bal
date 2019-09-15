@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/'lang\.object as lang;
+import ballerina/lang.'object as lang;
 
 type Annot record {
     string foo;
@@ -138,8 +138,8 @@ service ser on lis {
     @v5 {
         val: "54"
     }
-    resource function res(@v6 { foo: "v64" } int intVal) returns @v7 string {
-        return "";
+    resource function res(@v6 { foo: "v64" } int intVal) returns @v7 () {
+        return;
     }
 }
 
@@ -170,8 +170,8 @@ service serTwo = @v8 {
     @v5 {
         val: "542"
     }
-    resource function res(@v6 { foo: "v642" } int intVal) returns @v7 int {
-        return 1;
+    resource function res(@v6 { foo: "v642" } int intVal) returns @v7 error? {
+        return;
     }
 };
 
@@ -194,13 +194,39 @@ function testServiceAnnotAccess4() returns boolean {
     return annot is ();
 }
 
+@v3 {
+    foo: "func",
+    bar: 1
+}
+function funcWithAnnots() {
+
+}
+
+function testFunctionAnnotAccess1() returns boolean {
+    typedesc<any> t = typeof funcWithAnnots;
+    Annot? annot = t.@v3;
+    if (annot is Annot) {
+        return annot.foo == "func" && annot?.bar == 1;
+    }
+    return false;
+}
+
+function testFunctionAnnotAccess2() returns boolean {
+    typedesc<any> t = typeof serTwo;
+    Annot[]? annot = t.@v2;
+    return annot is ();
+}
+
 type Listener object {
-    *lang:AbstractListener;
+    *lang:Listener;
 
     public function __init() {
     }
 
     public function __attach(service s, string? name = ()) returns error? {
+    }
+
+    public function __detach(service s) returns error? {
     }
 
     public function __start() returns error? {
@@ -214,3 +240,9 @@ type Listener object {
         return ();
     }
 };
+
+// TODO: #17936
+//public function testInlineAnnotAccess() returns boolean {
+//    Annot? f = (typeof a).@v1;
+//    return f is Annot;
+//}

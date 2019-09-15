@@ -19,6 +19,7 @@ package org.ballerinalang.langserver.sourceprune;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.ballerinalang.langserver.LSContextOperation;
 import org.ballerinalang.langserver.common.utils.CommonUtil;
 import org.ballerinalang.langserver.compiler.DocumentServiceKeys;
 import org.ballerinalang.langserver.compiler.LSContext;
@@ -105,7 +106,7 @@ public class SourcePruneTest {
     }
     
     private LSContext getLSContext(String source, Position position) {
-        LSContext lsContext = new LSServiceOperationContext();
+        LSContext lsContext = new LSServiceOperationContext(LSContextOperation.SOURCE_PRUNER);
         URI fileUri = sourceRoot.resolve(source).toUri();
         TextDocumentPositionParams positionParams = new TextDocumentPositionParams();
         positionParams.setPosition(position);
@@ -178,10 +179,6 @@ public class SourcePruneTest {
                 {"src_prune_config41.json"},
                 // Match Statement
                 {"src_prune_config42.json"},
-                {"src_prune_config43.json"},
-                {"src_prune_config44.json"},
-                {"src_prune_config45.json"},
-                {"src_prune_config46.json"},
                 // Foreach statement
                 {"src_prune_config47.json"},
                 {"src_prune_config48.json"},
@@ -225,6 +222,15 @@ public class SourcePruneTest {
                 {"src_prune_config76.json"},
                 // Iterable Operators
                 {"src_prune_config77.json"},
+                // Type Descriptor
+                {"src_prune_config82.json"},
+                // Invalid source without semicolon after close parenthesis
+                {"src_prune_config83.json"},
+                {"src_prune_config84.json"},
+                {"src_prune_config85.json"},
+                {"src_prune_config86.json"},
+                {"src_prune_config87.json"},
+                {"src_prune_config88.json"},
         };
     }
 }

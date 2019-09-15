@@ -248,14 +248,14 @@
       "insertTextFormat": "Snippet"
     },
     {
-      "label": "ClientEndpointConfig",
+      "label": "ClientConfiguration",
       "kind": "Class",
       "detail": "Record",
       "documentation": {
         "left": "Provides a set of configurations for controlling the behaviours when communicating with a remote HTTP endpoint.\n"
       },
       "sortText": "120",
-      "insertText": "ClientEndpointConfig",
+      "insertText": "ClientConfiguration",
       "insertTextFormat": "Snippet"
     },
     {
@@ -738,14 +738,14 @@
       "insertTextFormat": "Snippet"
     },
     {
-      "label": "FailoverClientEndpointConfiguration",
+      "label": "FailoverClientConfiguration",
       "kind": "Class",
       "detail": "Record",
       "documentation": {
         "left": "Provides a set of HTTP related configurations and failover related configurations.\n"
       },
       "sortText": "120",
-      "insertText": "FailoverClientEndpointConfiguration",
+      "insertText": "FailoverClientConfiguration",
       "insertTextFormat": "Snippet"
     },
     {
@@ -859,14 +859,14 @@
       "insertTextFormat": "Snippet"
     },
     {
-      "label": "LoadBalancerRounRobinRule",
+      "label": "LoadBalancerRoundRobinRule",
       "kind": "Class",
       "detail": "Object",
       "documentation": {
         "left": "Implementation of round robin load balancing strategy.\n"
       },
       "sortText": "120",
-      "insertText": "LoadBalancerRounRobinRule",
+      "insertText": "LoadBalancerRoundRobinRule",
       "insertTextFormat": "Snippet"
     },
     {
@@ -892,14 +892,14 @@
       "insertTextFormat": "Snippet"
     },
     {
-      "label": "LoadBalanceClientEndpointConfiguration",
+      "label": "LoadBalanceClientConfiguration",
       "kind": "Class",
       "detail": "Record",
       "documentation": {
         "left": "The configurations related to the load balance client endpoint.\n"
       },
       "sortText": "120",
-      "insertText": "LoadBalanceClientEndpointConfiguration",
+      "insertText": "LoadBalanceClientConfiguration",
       "insertTextFormat": "Snippet"
     },
     {
@@ -980,14 +980,14 @@
       "insertTextFormat": "Snippet"
     },
     {
-      "label": "AuthCacheConfig",
+      "label": "AuthzCacheConfig",
       "kind": "Class",
       "detail": "Record",
       "documentation": {
         "left": "Provides a set of configurations for controlling the authorization caching behaviour of the endpoint.\n"
       },
       "sortText": "120",
-      "insertText": "AuthCacheConfig",
+      "insertText": "AuthzCacheConfig",
       "insertTextFormat": "Snippet"
     },
     {
@@ -1007,17 +1007,6 @@
       "detail": "Object",
       "sortText": "120",
       "insertText": "AttributeFilter",
-      "insertTextFormat": "Snippet"
-    },
-    {
-      "label": "WebSocketListener",
-      "kind": "Class",
-      "detail": "Object",
-      "documentation": {
-        "left": "Represents a WebSocket service endpoint."
-      },
-      "sortText": "120",
-      "insertText": "WebSocketListener",
       "insertTextFormat": "Snippet"
     },
     {

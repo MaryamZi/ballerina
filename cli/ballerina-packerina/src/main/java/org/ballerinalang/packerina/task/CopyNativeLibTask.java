@@ -22,28 +22,31 @@ import com.moandjiezana.toml.Toml;
 import org.ballerinalang.model.elements.PackageID;
 import org.ballerinalang.packerina.buildcontext.BuildContext;
 import org.ballerinalang.packerina.buildcontext.BuildContextField;
+import org.ballerinalang.toml.model.Dependency;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BPackageSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.util.ProjectDirs;
+import org.wso2.ballerinalang.programfile.ProgramFileConstants;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 import static org.ballerinalang.packerina.buildcontext.sourcecontext.SourceType.SINGLE_BAL_FILE;
 import static org.ballerinalang.tool.LauncherUtils.createLauncherException;
 import static org.wso2.ballerinalang.compiler.util.ProjectDirConstants.BALO_PLATFORM_LIB_DIR_NAME;
-import static org.wso2.ballerinalang.compiler.util.ProjectDirConstants.BLANG_COMPILED_JAR_EXT;
 import static org.wso2.ballerinalang.compiler.util.ProjectDirConstants.BLANG_PKG_DEFAULT_VERSION;
 import static org.wso2.ballerinalang.compiler.util.ProjectDirConstants.TARGET_TMP_DIRECTORY;
 
@@ -51,14 +54,17 @@ import static org.wso2.ballerinalang.compiler.util.ProjectDirConstants.TARGET_TM
  * Copy native libraries to target/tmp.
  */
 public class CopyNativeLibTask implements Task {
-
-    private boolean skipCopyLibsFromDist = false;
+    private List<String> supportedPlatforms = Arrays.stream(ProgramFileConstants.SUPPORTED_PLATFORMS)
+            .collect(Collectors.toList());
+    private boolean skipCopyLibsFromDist;
 
     public CopyNativeLibTask(boolean skipCopyLibsFromDist) {
         this.skipCopyLibsFromDist = skipCopyLibsFromDist;
+        supportedPlatforms.add("any");
     }
 
     public CopyNativeLibTask() {
+        this(false);
     }
     
     @Override
@@ -77,10 +83,6 @@ public class CopyNativeLibTask implements Task {
             throw createLauncherException("unable to copy the native library: " + e.getMessage());
         }
         List<BLangPackage> moduleBirMap = buildContext.getModules();
-        // Copy ballerina runtime all jar
-        if (!skipCopyLibsFromDist) {
-            copyRuntimeAllJar(balHomePath, tmpDir);
-        }
         copyImportedJars(buildContext, moduleBirMap, sourceRootPath, tmpDir, balHomePath);
         if (buildContext.getSourceType() == SINGLE_BAL_FILE) {
             return;
@@ -89,18 +91,6 @@ public class CopyNativeLibTask implements Task {
         for (BLangPackage module : moduleBirMap) {
             Path baloAbsolutePath = buildContext.getBaloFromTarget(module.packageID);
             copyLibsFromBalo(baloAbsolutePath.toString(), tmpDir.toString());
-        }
-    }
-
-
-    private void copyRuntimeAllJar(String balHomePath, Path jarTarget) {
-        String ballerinaVersion = System.getProperty("ballerina.version");
-        String runtimeJarName = "ballerina-rt-" + ballerinaVersion + BLANG_COMPILED_JAR_EXT;
-        Path runtimeAllJar = Paths.get(balHomePath, "bre", "lib", runtimeJarName);
-        try {
-            Files.copy(runtimeAllJar, Paths.get(jarTarget.toString(), runtimeJarName));
-        } catch (IOException e) {
-            throw createLauncherException("unable to copy the ballerina runtime all jar :" + e.getMessage());
         }
     }
 
@@ -130,29 +120,35 @@ public class CopyNativeLibTask implements Task {
 
     private void copyImportedLib(BuildContext buildContext, BPackageSymbol importz, Path project,
                                  Path tmpDir, String balHomePath) {
-        // Get the jar paths
-        Path importJar = findImportBaloPath(buildContext, importz, project);
-        if (importJar != null && Files.exists(importJar)) {
-            copyLibsFromBalo(importJar.toString(), tmpDir.toString());
-            return;
+        // Get the balo paths
+        for (String platform : supportedPlatforms) {
+            Path importJar = findImportBaloPath(buildContext, importz, project, platform);
+            if (importJar != null && Files.exists(importJar)) {
+                copyLibsFromBalo(importJar.toString(), tmpDir.toString());
+                return;
+            }
         }
+
         // If balo cannot be found from target or cache, get dependencies from distribution toml.
         copyDependenciesFromToml(importz, balHomePath, tmpDir);
     }
 
-    private static Path findImportBaloPath(BuildContext buildContext, BPackageSymbol importz, Path project) {
+    private static Path findImportBaloPath(BuildContext buildContext, BPackageSymbol importz, Path project,
+                                           String platform) {
         // Get the jar paths
         PackageID id = importz.pkgID;
-
+    
+        Optional<Dependency> importPathDependency = buildContext.getImportPathDependency(id);
         // Look if it is a project module.
         if (ProjectDirs.isModuleExist(project, id.name.value)) {
             // If so fetch from project balo cache
             return buildContext.getBaloFromTarget(id);
+        } else if (importPathDependency.isPresent()) {
+            return importPathDependency.get().getMetadata().getPath();
         } else {
             // If not fetch from home balo cache.
-            return buildContext.getBaloFromHomeCache(id);
+            return buildContext.getBaloFromHomeCache(id, platform);
         }
-        // return the path
     }
 
     private void copyLibsFromBalo(String jarFileName, String destFile) {
@@ -169,10 +165,8 @@ public class CopyNativeLibTask implements Task {
                         continue;
                     }
                     // get the input stream
-                    try (InputStream is = jar.getInputStream(file); FileOutputStream fos = new FileOutputStream(f)) {
-                        while (is.available() > 0) {  // write contents of 'is' to 'fos'
-                            fos.write(is.read());
-                        }
+                    try (InputStream is = jar.getInputStream(file)) {
+                        Files.copy(is, f.toPath());
                     }
                 }
             }

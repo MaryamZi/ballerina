@@ -17,8 +17,13 @@
 package org.ballerinalang.jvm.scheduling;
 
 import org.ballerinalang.jvm.BallerinaErrors;
+import org.ballerinalang.jvm.transactions.TransactionLocalContext;
+import org.ballerinalang.jvm.types.BType;
+import org.ballerinalang.jvm.types.BTypes;
 import org.ballerinalang.jvm.util.BLangConstants;
+import org.ballerinalang.jvm.util.RuntimeUtils;
 import org.ballerinalang.jvm.values.ChannelDetails;
+import org.ballerinalang.jvm.values.ErrorValue;
 import org.ballerinalang.jvm.values.FPValue;
 import org.ballerinalang.jvm.values.FutureValue;
 import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
@@ -35,6 +40,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static org.ballerinalang.jvm.runtime.RuntimeConstants.GLOBAL_TRANSACTION_ID;
+import static org.ballerinalang.jvm.runtime.RuntimeConstants.TRANSACTION_URL;
 import static org.ballerinalang.jvm.scheduling.SchedulerItem.POISON_PILL;
 
 /**
@@ -104,12 +111,12 @@ public class Scheduler {
         return strand;
     }
 
-    public FutureValue scheduleFunction(Object[] params, FPValue<?, ?> fp, Strand parent) {
-        return schedule(params, fp.getFunction(), parent, null, null);
+    public FutureValue scheduleFunction(Object[] params, FPValue<?, ?> fp, Strand parent, BType returnType) {
+        return schedule(params, fp.getFunction(), parent, null, null, returnType);
     }
 
     public FutureValue scheduleConsumer(Object[] params, FPValue<?, ?> fp, Strand parent) {
-        return schedule(params, fp.getConsumer(), parent);
+        return schedule(params, fp.getConsumer(), parent, null);
     }
 
     /**
@@ -120,11 +127,12 @@ public class Scheduler {
      * @param parent   - parent strand that makes the request to schedule another
      * @param callback - to notify any listener when ever the execution of the given function is finished
      * @param properties - request properties which requires for co-relation
+     * @param returnType - return type of the scheduled function
      * @return - Reference to the scheduled task
      */
     public FutureValue schedule(Object[] params, Function function, Strand parent, CallableUnitCallback callback,
-                                Map<String, Object> properties) {
-        FutureValue future = createFuture(parent, callback, properties);
+                                Map<String, Object> properties, BType returnType) {
+        FutureValue future = createFuture(parent, callback, properties, returnType);
         return schedule(params, function, parent, future);
     }
 
@@ -146,10 +154,11 @@ public class Scheduler {
      * @param params   - parameters to be passed to the function
      * @param consumer - consumer to be executed
      * @param parent   - parent strand that makes the request to schedule another
+     * @param callback - to notify any listener when ever the execution of the given function is finished
      * @return - Reference to the scheduled task
      */
-    public FutureValue schedule(Object[] params, Consumer consumer, Strand parent) {
-        FutureValue future = createFuture(parent, null, null);
+    public FutureValue schedule(Object[] params, Consumer consumer, Strand parent, CallableUnitCallback callback) {
+        FutureValue future = createFuture(parent, callback, null, BTypes.typeNull);
         params[0] = future.strand;
         SchedulerItem item = new SchedulerItem(consumer, params, future);
         future.strand.schedulerItem = item;
@@ -229,7 +238,15 @@ public class Scheduler {
             } catch (Throwable e) {
                 panic = e;
                 notifyChannels(item, panic);
-                logger.error("Strand died", e);
+              
+                if (!(e instanceof ErrorValue)) {
+                    RuntimeUtils.printCrashLog(e);
+                }
+                // Please refer #18763.
+                // This logs cases where errors have occurred while strand is blocked.
+                if (item.isYielded()) {
+                    RuntimeUtils.printCrashLog(e);
+                }
             } finally {
                 strandHolder.get().strand = null;
             }
@@ -280,6 +297,9 @@ public class Scheduler {
                     if (item.future.callback != null) {
                         if (item.future.panic != null) {
                             item.future.callback.notifyFailure(BallerinaErrors.createError(panic));
+                            if (item.future.transactionLocalContext != null) {
+                                item.future.transactionLocalContext.notifyLocalRemoteParticipantFailure();
+                            }
                         } else {
                             item.future.callback.notifySuccess();
                         }
@@ -313,9 +333,6 @@ public class Scheduler {
                         // (number of started stands - finished stands) = 0, all the work is done
                         assert runnableList.size() == 0;
 
-                        // server agent start code will be inserted in above line during tests.
-                        // It depends on this line number 315.
-                        // update the linenumber @BallerinaServerAgent#SCHEDULER_LINE_NUM if modified
                         if (DEBUG) {
                             debugLog("+++++++++ all work completed ++++++++");
                         }
@@ -397,12 +414,14 @@ public class Scheduler {
             }
     }
 
-    private FutureValue createFuture(Strand parent, CallableUnitCallback callback, Map<String, Object> properties) {
+    private FutureValue createFuture(Strand parent, CallableUnitCallback callback, Map<String, Object> properties,
+                                     BType constraint) {
         Strand newStrand = new Strand(this, parent, properties);
         if (parent != null) {
             newStrand.observerContext = parent.observerContext;
         }
-        FutureValue future = new FutureValue(newStrand, callback);
+        FutureValue future = new FutureValue(newStrand, callback, constraint);
+        infectResourceFunction(newStrand, future);
         future.strand.frames = new Object[100];
         return future;
     }
@@ -410,6 +429,18 @@ public class Scheduler {
     public void poison() {
         for (int i = 0; i < numThreads; i++) {
             runnableList.add(POISON_PILL);
+        }
+    }
+
+    private void infectResourceFunction(Strand strand, FutureValue futureValue) {
+        String gTransactionId = (String) strand.getProperty(GLOBAL_TRANSACTION_ID);
+        if (gTransactionId != null) {
+            String globalTransactionId = strand.getProperty(GLOBAL_TRANSACTION_ID).toString();
+            String url = strand.getProperty(TRANSACTION_URL).toString();
+            TransactionLocalContext transactionLocalContext = TransactionLocalContext.create(globalTransactionId,
+                                                                                             url, "2pc");
+            strand.setLocalTransactionContext(transactionLocalContext);
+            futureValue.transactionLocalContext = transactionLocalContext;
         }
     }
 }

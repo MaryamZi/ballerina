@@ -58,19 +58,19 @@ public class DiagnosticsHelper {
      *
      * @param client     Language server client
      * @param context    LS context
+     * @param lsDocument {@link LSDocument}
      * @param docManager LS Document manager
      * @throws CompilationFailedException throws a LS compiler exception
      */
-    public synchronized void compileAndSendDiagnostics(LanguageClient client, LSContext context,
+    public synchronized void compileAndSendDiagnostics(LanguageClient client, LSContext context, LSDocument lsDocument,
                                                        WorkspaceDocumentManager docManager) throws
                                                                                             CompilationFailedException {
         // Compile diagnostics
         List<org.ballerinalang.util.diagnostic.Diagnostic> diagnostics = new ArrayList<>();
-        LSDocument lsDocument = new LSDocument(context.get(DocumentServiceKeys.FILE_URI_KEY));
-        LSModuleCompiler.getBLangPackages(context, docManager, true, null, true, true);
+        LSModuleCompiler.getBLangPackages(context, docManager, null, true, true, true);
         CompilerContext compilerContext = context.get(DocumentServiceKeys.COMPILER_CONTEXT_KEY);
         if (compilerContext.get(DiagnosticListener.class) instanceof CollectDiagnosticListener) {
-             diagnostics = ((CollectDiagnosticListener) compilerContext.get(DiagnosticListener.class)).getDiagnostics();
+            diagnostics = ((CollectDiagnosticListener) compilerContext.get(DiagnosticListener.class)).getDiagnostics();
         }
 
         Map<String, List<Diagnostic>> diagnosticMap = getDiagnostics(diagnostics, lsDocument);
@@ -124,7 +124,15 @@ public class DiagnosticsHelper {
 
             Range range = new Range(new Position(startLine, startChar), new Position(endLine, endChar));
             Diagnostic diagnostic = new Diagnostic(range, diag.getMessage());
-            diagnostic.setSeverity(DiagnosticSeverity.Error);
+            org.ballerinalang.util.diagnostic.Diagnostic.Kind diagnosticKind = diag.getKind();
+
+            // set diagnostic log kind
+            if (diagnosticKind.equals(org.ballerinalang.util.diagnostic.Diagnostic.Kind.ERROR)) {
+                diagnostic.setSeverity(DiagnosticSeverity.Error);
+            } else if (diagnosticKind.equals(org.ballerinalang.util.diagnostic.Diagnostic.Kind.WARNING)) {
+                diagnostic.setSeverity(DiagnosticSeverity.Warning);
+            }
+
             clientDiagnostics.add(diagnostic);
         }
         return diagnosticsMap;
