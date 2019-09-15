@@ -34,9 +34,6 @@ function testModuleLevelAccessOfAbstractObject() {
     test:assertEquals(abstractObj.defaultVisibiltyMethodDecl("argOne", 50), (),
         msg = "expected object default visibility method to be accessible");
 
-    test:assertEquals(abstractObj.defaultVisibiltyMethodOutsideDecl("argOne", 25), (),
-        msg = "expected object default visibility method declared outside to be accessible");
-
     test:assertEquals(abstractObj.publicMethodDecl("argOne", 125, 25), 325.0,
         msg = "expected object public visibility method to be accessible");
 }
@@ -57,18 +54,11 @@ function testModuleLevelAccessOfAbstractClientObject() {
     test:assertEquals(clientObject.defaultVisibiltyMethodDecl("argOne", 50), (),
         msg = "expected client object default visibility method to be accessible");
 
-    test:assertEquals(clientObject.defaultVisibiltyMethodOutsideDecl("argOne", 25), (),
-        msg = "expected client object default visibility method declared outside to be accessible");
-
     _ = clientObject->defaultVisibiltyRemoteMethodDecl("argOne", 25);
     test:assertEquals(clientObject.publicMethodDecl("argOne", 125, 25), 350.0,
         msg = "expected client object public visibility method to be accessible");
 
-    var result = clientObject->remoteMethodOutsideDecl("argOne", 125);
-    test:assertEquals(result, 475.0,
-        msg = "expected client object public visibility remote method declared outside to be accessible");
-
-    result = clientObject->publicRemoteMethodDecl("argOne", 125, 50);
+    var result = clientObject->publicRemoteMethodDecl("argOne", 125, 50);
     test:assertEquals(result, 650.0,
         msg = "expected client object public visibility remote method declared outside to be accessible");
 }

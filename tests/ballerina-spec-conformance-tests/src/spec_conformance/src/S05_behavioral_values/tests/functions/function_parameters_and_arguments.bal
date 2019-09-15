@@ -76,33 +76,23 @@ function testFunctionInvocationWithoutNamedAndRestArgs() {
 
 @test:Config {}
 function testFunctionInvocationWithSingleNamedArgAndWithoutRestArg() {
-    test:assertEquals(funcWithNamedAndRestParams(a, j = c, b), a + b + c + INT_CONST,
+    test:assertEquals(funcWithNamedAndRestParams(a, b, l = c), a + b + c + INT_CONST,
         msg = EXPECTED_RETURN_VALUE_TO_BE_EQUAL_TO_SUM_FAILURE_MESSAGE);
 }
 
 @test:Config {}
 function testFunctionInvocationWithAllNamedArgsAndWithoutRestArg() {
-    test:assertEquals(funcWithNamedAndRestParams(a, j = c, b, k = d), a + b + c + d,
-        msg = EXPECTED_RETURN_VALUE_TO_BE_EQUAL_TO_SUM_FAILURE_MESSAGE);
-}
-
-@test:Config {}
-function testFunctionInvocationWithRestArgsAndWithoutNamedArgs() {
-    test:assertEquals(funcWithNamedAndRestParams(a, b, e, f), a + b + e + f + INT_CONST,
-        msg = EXPECTED_RETURN_VALUE_TO_BE_EQUAL_TO_SUM_FAILURE_MESSAGE);
-
-    int[] arr = [e, f];
-    test:assertEquals(funcWithNamedAndRestParams(a, b, ...arr), a + b + e + f + INT_CONST,
+    test:assertEquals(funcWithNamedAndRestParams(a, b, l = c, k = d), a + b + c + d,
         msg = EXPECTED_RETURN_VALUE_TO_BE_EQUAL_TO_SUM_FAILURE_MESSAGE);
 }
 
 @test:Config {}
 function testFunctionInvocationWithAllArgs() {
-    test:assertEquals(funcWithNamedAndRestParams(a, b, j = c, k = d, e, f), a + b + c + d + e + f,
+    test:assertEquals(funcWithNamedAndRestParams(a, b, d, c, e, f), a + b + c + d + e + f,
         msg = EXPECTED_RETURN_VALUE_TO_BE_EQUAL_TO_SUM_FAILURE_MESSAGE);
 }
 
-function funcWithNamedAndRestParams(int i, int j = 0, int k = 10, int l, int... m) returns int {
+function funcWithNamedAndRestParams(int i, int j, int k = INT_CONST, int l = 0, int... m) returns int {
     int sum = i + j + k + l;
     foreach int intVal in m {
         sum += intVal;

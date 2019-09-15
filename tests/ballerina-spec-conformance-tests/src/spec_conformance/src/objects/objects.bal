@@ -27,14 +27,7 @@ public type PublicNormalObject object {
         self.counter += 10;
         return self.counter;
     }
-
-    public function publicMethodDecl() returns int;
 };
-
-public function PublicNormalObject.publicMethodDecl() returns int {
-    self.counter += 10;
-    return self.counter;
-}
 
 public type PublicClientObject client object {
     public string publicStringField;
@@ -55,26 +48,12 @@ public type PublicClientObject client object {
         self.counter += 10;
         return self.counter;
     }
-
-    public function publicMethodDecl() returns int;
-    public remote function publicRemoteMethodDecl() returns int;
 };
-
-public function PublicClientObject.publicMethodDecl() returns int {
-    self.counter += 10;
-    return self.counter;
-}
-
-public remote function PublicClientObject.publicRemoteMethodDecl() returns int {
-    self.counter += 10;
-    return self.counter;
-}
 
 type AbstractObject abstract object {
     public string publicStringField;
 
     public function publicMethodDecl(string argOne) returns int;
-    public function publicMethodDeclaredOutside() returns int;
 };
 
 public type ObjReferenceToAbstractObject object {
@@ -97,18 +76,11 @@ public type ObjReferenceToAbstractObject object {
     }
 };
 
-public function ObjReferenceToAbstractObject.publicMethodDeclaredOutside() returns int {
-    self.counter += 10;
-    return self.counter;
-}
-
 public type AbstractClientObject abstract client object {
     public string publicStringField;
 
     public function publicMethodDecl() returns int;
     public remote function publicRemoteMethodDecl(string argOne) returns int;
-    public function publicMethodDeclaredOutside() returns int;
-    public remote function publicRemoteMethodDeclaredOutside() returns int;
 };
 
 public type ObjReferenceToAbstractClientObject client object {
@@ -135,13 +107,3 @@ public type ObjReferenceToAbstractClientObject client object {
         self.counter = 10;
     }
 };
-
-public function ObjReferenceToAbstractClientObject.publicMethodDeclaredOutside() returns int {
-    self.counter += 10;
-    return self.counter;
-}
-
-public remote function ObjReferenceToAbstractClientObject.publicRemoteMethodDeclaredOutside() returns int {
-    self.counter += 10;
-    return self.counter;
-}

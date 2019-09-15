@@ -26,9 +26,6 @@ function testPublicObjectAccessWithNormalObjects() {
 
     test:assertEquals(normalObject.publicMethodDefn(), 20,
         msg = "expected object public method to be accessible");
-
-    test:assertEquals(normalObject.publicMethodDecl(), 30,
-        msg = "expected object public method to be accessible");
 }
 
 @test:Config {}
@@ -46,13 +43,6 @@ function testPublicObjectAccessWithClientObjects() {
 
     test:assertEquals(clientObject.publicStringField, "changed string",
         msg = "expected client object public field to be updated");
-
-    test:assertEquals(clientObject.publicMethodDecl(), 40,
-        msg = "expected client object public method to be accessible");
-
-    result = clientObject->publicRemoteMethodDecl();
-    test:assertEquals(result, 50,
-        msg = "expected client object public method to be accessible");
 }
 
 @test:Config {}
@@ -70,9 +60,6 @@ function testPublicObjectAccessIncludingObjectReference() {
 
     test:assertEquals(normalObject.publicStringField, "string value",
         msg = "expected object public field to be accessible");
-
-    test:assertEquals(normalObject.publicMethodDeclaredOutside(), 30,
-        msg = "expected object public method to be accessible");
 }
 
 @test:Config {}
@@ -90,12 +77,6 @@ function testPublicClientObjectAccessIncludingObjectReference() {
 
     test:assertEquals(clientObject.publicStringField, "changed string",
         msg = "expected client object public field to be updated");
-
-    test:assertEquals(clientObject.publicMethodDeclaredOutside(), 40,
-        msg = "expected client object public method to be accessible");
-
-    result = clientObject->publicRemoteMethodDeclaredOutside();
-    test:assertEquals(result, 50, msg = "expected client object public method to be accessible");
 }
 
 type ObjReferenceToPublicAbstractClientObject client object {
@@ -123,17 +104,6 @@ type ObjReferenceToPublicAbstractClientObject client object {
     }
 };
 
-public function ObjReferenceToPublicAbstractClientObject.publicMethodDeclaredOutside() returns int {
-    self.counter += 10;
-    return self.counter;
-}
-
-public remote function ObjReferenceToPublicAbstractClientObject.publicRemoteMethodDeclaredOutside() returns int {
-    self.counter += 10;
-    return self.counter;
-}
-
-
 @test:Config {}
 function testPublicObjectAccessIncludingPublicObjectReference() {
     ObjReferenceToPublicAbstractClientObject clientObject = new("default string");
@@ -149,10 +119,4 @@ function testPublicObjectAccessIncludingPublicObjectReference() {
 
     test:assertEquals(clientObject.publicStringField, "changed string",
         msg = "expected client object public field to be updated");
-
-    test:assertEquals(clientObject.publicMethodDeclaredOutside(), 40,
-        msg = "expected client object public method to be accessible");
-
-    result = clientObject->publicRemoteMethodDeclaredOutside();
-    test:assertEquals(result, 50, msg = "expected client object public method to be accessible");
 }

@@ -61,7 +61,7 @@ function getAddFunction() returns (function (int i, int j) returns int) {
 }
 
 function execFunction(function (int i, int j) returns int func, int i, int j) returns int {
-    return func.call(i, j);
+    return func(i, j);
 }
 
 function add(int i, int j) returns int {

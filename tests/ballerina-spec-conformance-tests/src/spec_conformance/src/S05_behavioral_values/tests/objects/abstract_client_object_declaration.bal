@@ -19,6 +19,7 @@ import ballerina/test;
 const EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE = "expected referenced client abstract object's ";
 const FLOAT_VALUE_ONE = 3.0;
 const FLOAT_VALUE_TWO = 2.0;
+const INT_VALUE = 5;
 const STRING_FIELD = "string";
 
 // Objects are a combination of public and private fields along with a set of associated
@@ -56,7 +57,7 @@ const STRING_FIELD = "string";
 // the meaning is the same as if they had been specified explicitly.
 
 // If a non-abstract object type OT has a type reference to an abstract object type AT,
-// then each method declared in AT must be defined in OT using either a method-defn or an outside-method-defn.
+// then each method declared in AT must be defined in OT using a method-defn.
 type AbstractClientObject abstract client object {
     public string publicStringField;
     float defaultVisibilityFloatField;
@@ -64,14 +65,9 @@ type AbstractClientObject abstract client object {
     function getPrivateField() returns int;
     function defaultVisibiltyMethodDecl(string argOne, int argTwo);
     public function publicMethodDecl(string argOne, int argTwo, float defaultVisibilityFloatField) returns float;
-    function defaultVisibiltyMethodOutsideDecl(string argOne, int argTwo);
-    public function publicMethodOutsideDecl(string argOne, int argTwo, float defaultVisibilityFloatField) returns float;
     remote function defaultVisibiltyRemoteMethodDecl(string argOne, int argTwo);
     public remote function publicRemoteMethodDecl(string argOne, int argTwo,
                                                   float defaultVisibilityFloatField) returns float;
-    remote function remoteMethodOutsideDecl(string argOne, int argTwo) returns float;
-    public remote function publicRemoteMethodOutsideDecl(string argOne, int argTwo, float defaultVisibilityFloatField)
-                               returns float;
 };
 
 type ObjReferenceToAbstractClientObject client object {
@@ -108,29 +104,6 @@ type ObjReferenceToAbstractClientObject client object {
     }
 };
 
-function ObjReferenceToAbstractClientObject.defaultVisibiltyMethodOutsideDecl(string argOne, int argTwo) {
-    self.defaultVisibilityFloatField += argTwo;
-}
-
-public function ObjReferenceToAbstractClientObject.publicMethodOutsideDecl(
-                                                       string argOne, int argTwo, float defaultVisibilityFloatField)
-                                                       returns float {
-    self.defaultVisibilityFloatField += defaultVisibilityFloatField + argTwo;
-    return self.defaultVisibilityFloatField;
-}
-
-remote function ObjReferenceToAbstractClientObject.remoteMethodOutsideDecl(string argOne, int argTwo) returns float {
-    self.defaultVisibilityFloatField += argTwo;
-    return self.defaultVisibilityFloatField;
-}
-
-public remote function ObjReferenceToAbstractClientObject.publicRemoteMethodOutsideDecl(
-                                                              string argOne, int argTwo, float
-                                                              defaultVisibilityFloatField) returns float {
-    self.defaultVisibilityFloatField += defaultVisibilityFloatField + argTwo;
-    return self.defaultVisibilityFloatField;
-}
-
 @test:Config {}
 function testAbstractClientObjectDeclaration() {
     ObjReferenceToAbstractClientObject abstractClientObj = new("string", 12, 100.0);
@@ -147,30 +120,13 @@ function testAbstractClientObjectDeclaration() {
     test:assertTrue(abstractClientObj.defaultVisibiltyMethodDecl("argOne", 50) == (),
         msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "default visibility method to be accessible");
 
-    test:assertTrue(abstractClientObj.defaultVisibiltyMethodOutsideDecl("argOne", 25) == (),
-        msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE +
-            "default visibility method declared outside to be accessible");
-
-    test:assertTrue(abstractClientObj.publicMethodOutsideDecl("argOne", 25, 25.0) == 225.0,
-        msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public method declared outside to be accessible");
-
     _ = abstractClientObj->defaultVisibiltyRemoteMethodDecl("argOne", 25);
     test:assertTrue(abstractClientObj.publicMethodDecl("argOne", 125, 25) == 400.0,
         msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public visibility method to be accessible");
 
-    var result = abstractClientObj->remoteMethodOutsideDecl("argOne", 125);
-    test:assertTrue(result == 525.0,
-        msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE +
-            "default visibility remote method declared outside to be accessible");
-
-    result = abstractClientObj->publicRemoteMethodDecl("argOne", 125, 50);
-    test:assertTrue(result == 700.0,
+    var result = abstractClientObj->publicRemoteMethodDecl("argOne", 125, 50);
+    test:assertEquals(result, 700.0,
         msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public visibility remote method to be accessible");
-
-    result = abstractClientObj->publicRemoteMethodOutsideDecl("argOne", 25, 25.0);
-    test:assertTrue(result == 750.0,
-        msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE +
-            "public visibility remote method declared outside to be accessible");
 }
 
 type ClientAbstractObject client abstract object {
@@ -183,16 +139,16 @@ type ClientAbstractObject client abstract object {
 type ObjReferenceToClientAbstractObject client object {
     *ClientAbstractObject;
 
-    private float privateFloatField;
+    private int privateIntField;
 
     function __init() {
         self.publicStringField = STRING_FIELD;
         self.floatField = FLOAT_VALUE_ONE;
-        self.privateFloatField = FLOAT_VALUE_TWO;
+        self.privateIntField = INT_VALUE;
     }
 
-    remote function getPrivateField() returns float {
-        return self.privateFloatField;
+    remote function getPrivateField() returns int {
+        return self.privateIntField;
     }
 };
 
@@ -204,6 +160,6 @@ function testClientAbstractObjectDeclaration() {
         msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public field to be accessible");
 
     var result = abstractClientObj->getPrivateField();
-    test:assertEquals(result, FLOAT_VALUE_TWO,
+    test:assertEquals(result, INT_VALUE,
         msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "private field to be accessible via object method");
 }

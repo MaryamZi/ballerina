@@ -56,10 +56,6 @@ type NormalObject object {
         return self.privateIntField;
     }
 
-    public function publicMethodDecl(string argOne, int argTwo) returns float;
-    private function privateMethodDecl(string argOne, int argTwo);
-    function defaultVisibiltyMethodDecl(string argOne, int argTwo) returns float;
-
     public function publicMethodDefn(string argOne, int argTwo, float defaultVisibilityFloatField) returns float {
         if (defaultVisibilityFloatField == self.defaultVisibilityFloatField) {
             return 0.0;
@@ -79,20 +75,6 @@ type NormalObject object {
     }
 };
 
-public function NormalObject.publicMethodDecl(string argOne, int argTwo) returns float {
-    self.publicStringField = argOne;
-    self.privateMethodDecl(argOne, argTwo);
-    return self.defaultVisibilityFloatField;
-}
-
-private function NormalObject.privateMethodDecl(string argOne, int argTwo) {
-    self.defaultVisibilityFloatField += argTwo;
-}
-
-function NormalObject.defaultVisibiltyMethodDecl(string argOne, int argTwo) returns float {
-    return self.defaultVisibilityFloatField + argTwo;
-}
-
 @test:Config {}
 function testObjectDeclaration() {
     NormalObject normalObject = new("default string value", 12, 100.0);
@@ -106,13 +88,7 @@ function testObjectDeclaration() {
     test:assertTrue(normalObject.defaultVisibilityFloatField == 100.0,
         msg = EXPECTED_OBJECT_FAILURE_MESSAGE + "default visibility field to be accessible");
 
-    test:assertTrue(normalObject.defaultVisibiltyMethodDecl("argOne", 50) == 150.0,
-        msg = EXPECTED_OBJECT_FAILURE_MESSAGE + "default visibility method to be accessible");
-
     test:assertTrue(normalObject.publicMethodDefn("argOne", 100, 50.0) == 250.0,
-        msg = EXPECTED_OBJECT_FAILURE_MESSAGE + "public method to be accessible");
-
-    test:assertTrue(normalObject.publicMethodDecl("changed string", 100) == 350.0,
         msg = EXPECTED_OBJECT_FAILURE_MESSAGE + "public method to be accessible");
 
     test:assertTrue(normalObject.publicStringField == "changed string",

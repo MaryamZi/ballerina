@@ -33,8 +33,12 @@ type STRING_OR_INT "string"|"int";
 
 function funcWithUnionReturnType(STRING_OR_INT s) returns string|int {
     match s {
-        "string" => return "string";
-        "int" => return 1;
+        "string" => {
+            return "string";
+        }
+        "int" => {
+            return 1;
+        }
     }
     return "won't reach here";
 }

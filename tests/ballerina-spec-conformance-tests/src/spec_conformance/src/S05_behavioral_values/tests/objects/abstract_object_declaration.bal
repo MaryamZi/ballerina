@@ -61,8 +61,6 @@ type AbstractObject abstract object {
     function getPrivateField() returns int;
     function defaultVisibiltyMethodDecl(string argOne, int argTwo);
     public function publicMethodDecl(string argOne, int argTwo, float defaultVisibilityFloatField) returns float;
-    function defaultVisibiltyMethodOutsideDecl(string argOne, int argTwo);
-    public function publicMethodOutsideDecl(string argOne, int argTwo, float defaultVisibilityFloatField) returns float;
 };
 
 type ObjReferenceToAbstractObject object {
@@ -89,16 +87,6 @@ type ObjReferenceToAbstractObject object {
     }
 };
 
-function ObjReferenceToAbstractObject.defaultVisibiltyMethodOutsideDecl(string argOne, int argTwo) {
-    self.defaultVisibilityFloatField += argTwo;
-}
-
-public function ObjReferenceToAbstractObject.publicMethodOutsideDecl(string argOne, int argTwo,
-                                                                     float defaultVisibilityFloatField) returns float {
-    self.defaultVisibilityFloatField += defaultVisibilityFloatField + argTwo;
-    return self.defaultVisibilityFloatField;
-}
-
 @test:Config {}
 function testAbstractObjectDeclaration() {
     ObjReferenceToAbstractObject abstractObj = new("string", 12, 100.0);
@@ -114,12 +102,6 @@ function testAbstractObjectDeclaration() {
 
     test:assertTrue(abstractObj.defaultVisibiltyMethodDecl("argOne", 50) == (),
         msg = EXPECTED_ABSTRACT_OBJECT_FAILURE_MESSAGE + "default visibility method to be accessible");
-
-    test:assertTrue(abstractObj.defaultVisibiltyMethodOutsideDecl("argOne", 25) == (),
-        msg = EXPECTED_ABSTRACT_OBJECT_FAILURE_MESSAGE + "default visibility method declared outside to be accessible");
-
-    test:assertTrue(abstractObj.publicMethodOutsideDecl("argOne", 25, 25.0) == 225.0,
-        msg = EXPECTED_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public method declared outside to be accessible");
 
     test:assertTrue(abstractObj.publicMethodDecl("argOne", 125, 25) == 375.0,
         msg = EXPECTED_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public visibility method to be accessible");

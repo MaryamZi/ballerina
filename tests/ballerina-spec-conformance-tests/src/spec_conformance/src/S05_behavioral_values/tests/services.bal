@@ -14,15 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/test;
-
 // service-type-descriptor := service
 service sampleService = service {
     function serviceFunction() returns int {
         return 12;
     }
 
-    resource function serviceResourceFunction() returns boolean {
-        return true;
+    resource function serviceResourceFunction() returns error? {
+        return;
     }
 };

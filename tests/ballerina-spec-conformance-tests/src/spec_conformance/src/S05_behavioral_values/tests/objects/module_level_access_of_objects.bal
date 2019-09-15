@@ -31,9 +31,6 @@ function testModuleLevelAccessOfObject() {
 
     test:assertEquals(normalObject.defaultVisibilityFloatField, 100.0, msg = "expected object public field");
 
-    test:assertEquals(normalObject.defaultVisibiltyMethodDecl("argOne", 50), 150.0,
-        msg = "expected object public field");
-
     test:assertEquals(normalObject.publicMethodDefn("argOne", 100, 50.0), 250.0, msg = "expected object public field");
 
     test:assertEquals(normalObject.defaultVisibiltyMethodDefn("argOne", 100), 350.0,
@@ -50,12 +47,6 @@ function testModuleLevelAccessOfClientObject() {
     test:assertEquals(clientObject.getPrivateField(), 12,
         msg = "expected object private field to be accessible via an object method");
     test:assertEquals(clientObject.defaultVisibilityFloatField, 100.0, msg = "expected object public field");
-
-    test:assertEquals(clientObject.defaultVisibiltyMethodDecl("argOne", 50), 150.0,
-        msg = "expected object public field");
-
-    _ = clientObject->defaultVisibiltyRemoteMethodDecl("argOne", 50);
-    test:assertEquals(clientObject.defaultVisibilityFloatField, 200.0, msg = "expected object public field");
 
     test:assertEquals(clientObject.publicMethodDefn("argOne", 100, 150), 450.0, msg = "expected object public field");
 

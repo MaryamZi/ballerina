@@ -14,8 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/test;
-
 // If object-type-quals contains the keyword client, then the object type is a client
 // object type. A client object type may have remote methods; other objects types must not.
 // TODO: Can not declare client object without remote methods

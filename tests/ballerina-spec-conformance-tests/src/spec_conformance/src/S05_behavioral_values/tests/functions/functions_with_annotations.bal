@@ -49,10 +49,10 @@ function testFunctionWithAnnotatedReturn() {
     test:assertEquals(s1, s2, msg = EXPECTED_VALUES_TO_BE_UNCHANGED_FAILURE_MESSAGE);
 }
 
-function funcWithAnnotatedParam(@sensitive string s) returns string {
+function funcWithAnnotatedParam(@untainted string s) returns string {
     return s;
 }
 
 function funcWithAnnotatedReturn(string s) returns @untainted string {
-    return untaint s;
+    return <@untainted> s;
 }
