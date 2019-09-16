@@ -25,15 +25,15 @@ const EXPECTED_STAMPING_TO_BE_SUCCESSFUL_FAILURE_MESSAGE = "expected stamping to
 @test:Config {}
 function testLooksLikeArray() {
     (int|boolean)[3] a = [true, false, false];
-    var result1 = boolean[].stamp(a);
+    var result1 = boolean[].constructFrom(a);
     test:assertTrue(result1 is boolean[], msg = EXPECTED_STAMPING_TO_BE_SUCCESSFUL_FAILURE_MESSAGE);
 }
 
 @test:Config {}
 function testLooksLikeTuple() {
-    (int|boolean, string|float, decimal) c = (false, 1.0, 5.2d);
-    var result2 = (boolean, float, decimal).stamp(c);
-    test:assertTrue(result2 is (boolean, float, decimal), msg = EXPECTED_STAMPING_TO_BE_SUCCESSFUL_FAILURE_MESSAGE);
+    [int|boolean, string|float, decimal] c = [false, 1.0, 5.2d];
+    var result2 = [boolean, float, decimal].constructFrom(c);
+    test:assertTrue(result2 is [boolean, float, decimal], msg = EXPECTED_STAMPING_TO_BE_SUCCESSFUL_FAILURE_MESSAGE);
 }
 
 @test:Config {}
@@ -42,7 +42,7 @@ function testLooksLikeMap() {
         zero: "map with strings only",
         one: "test string 1"
     };
-    var result3 = map<string>.stamp(m);
+    var result3 = map<string>.constructFrom(m);
     test:assertTrue(result3 is map<string>, msg = EXPECTED_STAMPING_TO_BE_SUCCESSFUL_FAILURE_MESSAGE);
 }
 
@@ -57,6 +57,6 @@ function testLooksLikeRecord() {
         bazFieldOne: 1.0,
         bazFieldTwo: "test string 1"
     };
-    var result4 = BazRecord.stamp(b);
+    var result4 = BazRecord.constructFrom(b);
     test:assertTrue(result4 is BazRecord, msg = EXPECTED_STAMPING_TO_BE_SUCCESSFUL_FAILURE_MESSAGE);
 }

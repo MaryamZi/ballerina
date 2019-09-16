@@ -43,7 +43,7 @@ function testInt(int i1, int i2, int i3, int i4) {
 }
 function testOutOfRangeValueAsInt(decimal d) {
     utils:assertPanic(function() returns int|error { return <int> d; },
-        "{ballerina}ConversionError", "invalid reason on out of range int value");
+        "{ballerina}NumberConversionError", "invalid reason on out of range int value");
 }
 
 function intDataProvider() returns int[][] {

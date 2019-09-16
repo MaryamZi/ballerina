@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/test;
-import utils;
 
 // However, for other types of value, what is stored in the variable or member is a 
 // reference to the value; the value itself has its own separate storage.
@@ -90,40 +89,4 @@ function testIterableTypesBroken() {
     //    foreach var char in iterableString {
     //        // TODO
     //    }
-}
-
-// TODO: Need to fix https://github.com/ballerina-platform/ballerina-lang/issues/13726 to enable this
-@test:Config {
-    groups: ["deviation"]
-}
-function testImplicitInitialValueOfTypedesc() {
-    typedesc[] typedescArray = [];
-    typedescArray[1] = int;
-    //typedesc expectedTypedesc = ();
-    //test:assertEquals(typedescArray[0], expectedTypedesc, msg = "expected implicit initial value of typedesc to be ()");
-}
-
-public type QuxObject object {
-    public string fooFieldOne;
-
-    public function __init() {
-        self.fooFieldOne = "init value";
-    }
-
-    public function getFooFieldOne() returns string {
-        return self.fooFieldOne;
-    }
-};
-
-// Implicit initial values for objects not yet supported. Decided to fix this with jBallerina.
-// https://github.com/ballerina-platform/ballerina-lang/issues/13728
-@test:Config {
-    groups: ["deviation"]
-}
-function testImplicitInitialValueOfObjects() {
-    QuxObject[] objArray = [];
-    objArray[1] = new QuxObject();
-    QuxObject expectedObject = new;
-    //test:assertEquals(objArray[0].fooFieldOne, expectedObject.fooFieldOne,
-    //    msg = "expected implicit initial value of QuxObject should be '{fooFieldOne:\"init value\"}'");
 }

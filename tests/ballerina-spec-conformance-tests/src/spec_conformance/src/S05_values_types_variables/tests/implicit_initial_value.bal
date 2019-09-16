@@ -70,11 +70,11 @@ function testImplicitInitialValueOfIntArrayType() {
 
 @test:Config {}
 function testImplicitInitialValueOfFloatArrayType() {
-    float[][4] twoDFloatArrayWithLength = [];
+    float[][] twoDFloatArrayWithLength = [];
     twoDFloatArrayWithLength[1] = [1.1, 2.2, 3.3, 4.4];
-    float[] expectedArray = [0.0, 0.0, 0.0, 0.0];
+    float[] expectedArray = [];
     test:assertEquals(twoDFloatArrayWithLength[0], expectedArray,
-        msg = "expected implicit initial value of float[4] to be [0.0, 0.0, 0.0, 0.0]");
+        msg = "expected implicit initial value of float[] to be []");
 }
 
 @test:Config {}
@@ -121,9 +121,9 @@ function testImplicitInitialValueOfJSONType() {
 
 @test:Config {}
 function testImplicitInitialValueOfTuples() {
-    (int, boolean, string)[] tupleArray = [];
-    tupleArray[1] = (200, true, "test string");
-    (int, boolean, string) expectedTuple = (0, false, "");
+    [int, boolean, string][] tupleArray = [];
+    tupleArray[1] = [200, true, "test string"];
+    [int, boolean, string] expectedTuple = [0, false, ""];
     test:assertEquals(tupleArray[0], expectedTuple,
         msg = "expected implicit initial value of (int, boolean, string) to be (0, false, \"\")");
 }
@@ -141,9 +141,9 @@ function testImplicitInitialValueOfMaps() {
 function testImplicitInitialValueOfRecords() {
     QuuxRecord[] quuxRecordArray = [];
     quuxRecordArray[1] = { quuxFieldOne: "valueOne" };
-    QuuxRecord expectedRecord = {quuxFieldOne: ""};
+    QuuxRecord expectedRecord = {quuxFieldOne: "default"};
     test:assertEquals(quuxRecordArray[0], expectedRecord,
-        msg = "expected implicit initial value of QuuxRecord to be { quuxFieldOne: \"\" }");
+        msg = "expected implicit initial value of QuuxRecord to be { quuxFieldOne: \"default\" }");
 }
 
 @test:Config {}
@@ -153,7 +153,6 @@ function testImplicitInitialValueOfTables() {
     any implicitInitVal = tableArray[0];
     test:assertTrue(implicitInitVal is table<QuuzRecord>,
         msg = "expected implicit initial value to be of type table<QuuzRecord>");
-    test:assertEquals(tableArray[0].length(), 0, msg = "expected table to be empty");
 }
 
 @test:Config {}
@@ -180,5 +179,26 @@ public type QuuzRecord record {|
 |};
 
 public type QuuxRecord record {|
-    string quuxFieldOne;
+    string quuxFieldOne = "default";
 |};
+
+public type QuxObject object {
+    public string fooFieldOne;
+
+    public function __init() {
+        self.fooFieldOne = "init value";
+    }
+
+    public function getFooFieldOne() returns string {
+        return self.fooFieldOne;
+    }
+};
+
+@test:Config {}
+function testImplicitInitialValueOfObjects() {
+    QuxObject[] objArray = [];
+    objArray[1] = new QuxObject();
+    QuxObject expectedObject = new;
+    test:assertEquals(objArray[0].fooFieldOne, expectedObject.fooFieldOne,
+       msg = "expected implicit initial value of QuxObject should be '{fooFieldOne:\"init value\"}'");
+}

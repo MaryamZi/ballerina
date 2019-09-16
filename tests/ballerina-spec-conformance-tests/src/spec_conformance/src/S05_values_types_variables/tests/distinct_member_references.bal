@@ -32,7 +32,7 @@ public type FooRecordOne record {|
 @test:Config {}
 function testDistinctTupleMembersReferringToSameValue() {
     FooRecordOne f1 = { fooOneFieldOne: "test string 1" };
-    (int, FooRecordOne, FooRecordOne) s3 = (1, f1, f1);
+    [int, FooRecordOne, FooRecordOne] s3 = [1, f1, f1];
     test:assertTrue(s3[1] === s3[2], msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
 }
 
@@ -41,7 +41,7 @@ function testDistinctMapMembersReferringToSameValue() {
     FooObject f2 = new("test string 2");
     FooObject f3 = new("test string 3");
     map<FooObject> s4 = { one: f2, two: f3, three: f2 };
-    test:assertTrue(s4.one === s4.three, msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
+    test:assertTrue(s4["one"] === s4["three"], msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
 }
 
 public type FooRecordTwo record {
@@ -51,6 +51,6 @@ public type FooRecordTwo record {
 @test:Config {}
 function testDistinctRecordMembersReferringToSameValue() {
     FooRecordOne f4 = { fooOneFieldOne: "test string 4" };
-    FooRecordTwo b1 = { fooRecFieldOne: f4, fooTwoFieldOne: 1.0, fooRecFieldTwo: f4 };
-    test:assertTrue(b1.fooRecFieldOne === b1.fooRecFieldTwo, msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
+    FooRecordTwo b1 = { "fooRecFieldOne": f4, fooTwoFieldOne: 1.0, "fooRecFieldTwo": f4 };
+    test:assertTrue(b1["fooRecFieldOne"] === b1["fooRecFieldTwo"], msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
 }

@@ -23,13 +23,13 @@ function testLooksLikeAndBelongsToOfImmutableValues() {
         fieldOne: "valueOne",
         fieldTwo: "valueTwo"
     };
-    var immutableMap = mutableMap.freeze();
+    var immutableMap = mutableMap.cloneReadOnly();
 
     if !(immutableMap is map<string>) {
         test:assertFail(msg = "expected immutable value to belong to type map<string>");
     }
 
-    var result = trap map<string>.stamp(immutableMap);
+    var result = trap map<string>.constructFrom(immutableMap);
     if result is error {
         test:assertFail(msg = "expected immutable value to look like map<string>");
     }

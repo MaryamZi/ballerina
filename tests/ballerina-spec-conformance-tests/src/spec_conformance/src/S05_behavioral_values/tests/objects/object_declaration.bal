@@ -22,25 +22,32 @@ const EXPECTED_OBJECT_FAILURE_MESSAGE = "expected object's ";
 // functions, called methods, that can be used to manipulate them. An object’s methods are
 // associated with the object when the object is constructed and cannot be changed thereafter.
 
-// object-type-descriptor := object-type-quals object { object-member-descriptor* }
-// object-type-quals := [abstract] [client] | [client] abstract
-// object-member-descriptor := object-field-descriptor | object-method | object-type-reference
+// object-type-descriptor :=
+//    object-type-quals object {
+//       object-member-descriptor*
+//    }
+// object-type-quals :=
+//    [abstract] [client] | [client] abstract
+// object-member-descriptor :=
+//    object-field-descriptor
+//    | object-method
+//    | object-type-reference
 
-// object-field-descriptor := [visibility-qual] type-descriptor field-name ;
+// object-field-descriptor :=
+//    object-visibility-qual type-descriptor field-name [default-value];
 
 // object-method := method-decl | method-defn
 // method-decl :=
-// metadata
-// [visibility-qual][remote]
-// function method-name function-signature ;
+//    metadata
+//    method-defn-quals
+//    function method-name function-signature ;
 // method-defn :=
-// metadata
-// method-defn-quals
-// function method-name function-signature method-body
-// method-defn-quals := [extern] [visibility-qual] [remote] [visibility-qual] extern [remote]
+//    metadata
+//    method-defn-quals
+//    function method-name function-signature method-body
+// method-defn-quals := object-visibility-qual [remote]
 // method-name := identifier
-// method-body := function-body-block | ;
-// metadata := [DocumentationString] annots
+// method-body := function-body
 type NormalObject object {
     public string publicStringField;
     private int privateIntField;
@@ -91,9 +98,10 @@ function testObjectDeclaration() {
     test:assertTrue(normalObject.publicMethodDefn("argOne", 100, 50.0) == 250.0,
         msg = EXPECTED_OBJECT_FAILURE_MESSAGE + "public method to be accessible");
 
+    normalObject.publicStringField = "changed string";
     test:assertTrue(normalObject.publicStringField == "changed string",
         msg = EXPECTED_OBJECT_FAILURE_MESSAGE + "public field to be accessible");
 
-    test:assertTrue(normalObject.defaultVisibiltyMethodDefn("argOne", 50) == 400.0,
+    test:assertTrue(normalObject.defaultVisibiltyMethodDefn("argOne", 50) == 300.0,
         msg = EXPECTED_OBJECT_FAILURE_MESSAGE + "default visibility method to be accessible");
 }

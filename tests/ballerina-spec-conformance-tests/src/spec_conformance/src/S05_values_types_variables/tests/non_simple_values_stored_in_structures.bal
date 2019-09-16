@@ -33,7 +33,7 @@ public type BarRecord record {|
 @test:Config {}
 function testNonSimpleValuesStoredInTuples() {
     BarRecord f1 = { barFieldOne: "test string 1" };
-    (int, BarRecord) s3 = (1, f1);
+    [int, BarRecord] s3 = [1, f1];
     f1.barFieldOne = S;
     BarRecord f2 = s3[1];
     test:assertEquals(f2.barFieldOne, S, msg = "expected tuple member to have been updated");
@@ -57,7 +57,9 @@ function testNonSimpleValuesStoredInMaps() {
     FooObject f4 = new("test string 4");
     map<FooObject> s4 = { one: f3, two: f4 };
     f3.fooFieldOne = S;
-    test:assertEquals(s4.one.fooFieldOne, S, msg = "expected map member to have been updated");
+
+    FooObject fObj = <FooObject> s4["one"];
+    test:assertEquals(fObj.fooFieldOne, S, msg = "expected map member to have been updated");
 }
 
 public type BazRecord record {
@@ -67,8 +69,8 @@ public type BazRecord record {
 @test:Config {}
 function testNonSimpleValuesStoredInRecords() {
     BarRecord f5 = { barFieldOne: "test string 5" };
-    BazRecord b1 = { bazFieldOne: 1.0, fooRecField: f5 };
+    BazRecord b1 = { bazFieldOne: 1.0, "fooRecField": f5 };
     f5.barFieldOne = S;
-    BarRecord f6 = <BarRecord>b1.fooRecField;
+    BarRecord f6 = <BarRecord>b1["fooRecField"];
     test:assertEquals(f6.barFieldOne, S, msg = "expected record member to have been updated");
 }

@@ -105,12 +105,13 @@ function testClientObjectDeclaration() {
     test:assertEquals(clientObject.defaultVisibilityFloatField, 100.0,
         msg = EXPECTED_CLIENT_OBJECT_FAILURE_MESSAGE + "default visibility field to be accessible");
 
-    test:assertEquals(clientObject.publicMethodDefn("argOne", 100, 150), 500.0,
+    test:assertEquals(clientObject.publicMethodDefn("argOne", 100, 150), 350.0,
         msg = EXPECTED_CLIENT_OBJECT_FAILURE_MESSAGE + "public method to be accessible");
 
+    clientObject.publicStringField = "changed string";
     test:assertEquals(clientObject.publicStringField, "changed string",
         msg = EXPECTED_CLIENT_OBJECT_FAILURE_MESSAGE + "public field to be accessible");
 
-    test:assertEquals(clientObject.defaultVisibiltyMethodDefn("argOne", 25), 575.0,
+    test:assertEquals(clientObject.defaultVisibiltyMethodDefn("argOne", 25), 375.0,
         msg = EXPECTED_CLIENT_OBJECT_FAILURE_MESSAGE + "default visibility method to be accessible");
 }

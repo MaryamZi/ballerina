@@ -64,8 +64,7 @@ function testFloatingPointNaNValuesBroken() {
     decimal d2 = -0.0d/0.0d;
     //test:assertTrue(d1 == d2, msg = "expected +0.0 and -0.0 to be of same value");
     test:assertTrue(d1 != d2, msg = "expected +0.0 and -0.0 to be of same value");
-    //test:assertTrue(d1 === d2, msg = "expected +0.0 and -0.0 to be of same value");
-    test:assertTrue(d1 !== d2, msg = "expected +0.0 and -0.0 to be of same value");
+    test:assertTrue(d1 === d2, msg = "expected +0.0 and -0.0 to be of same value");
 }
 
 // Positive and negative zero of a floating point basic type are distinct values,

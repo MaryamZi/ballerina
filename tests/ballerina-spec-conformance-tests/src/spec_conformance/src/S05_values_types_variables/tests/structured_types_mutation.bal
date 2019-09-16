@@ -38,8 +38,8 @@ function testArrayMutation() {
 function testTupleMutation() {
     FooRecordOne f1 = { fooOneFieldOne: "test string 1" };
     FooRecordOne f2 = { fooOneFieldOne: "test string 2" };
-    (int, FooRecordOne, FooRecordOne) s1 = (1, f1, f1);
-    (int, FooRecordOne, FooRecordOne) s2 = s1;
+    [int, FooRecordOne, FooRecordOne] s1 = [1, f1, f1];
+    [int, FooRecordOne, FooRecordOne] s2 = s1;
 
     s1[2] = f2;
     test:assertEquals(s1[2], f2, msg = EXPECTED_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
@@ -55,10 +55,10 @@ function testMapMutation() {
     map<FooObject> s1 = { one: f1 };
     map<FooObject> s2 = s1;
 
-    s2.one = f3;
-    s2.two = f2;
-    test:assertEquals(s2.one, f3, msg = EXPECTED_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
-    test:assertEquals(s2.two, f2, msg = EXPECTED_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
+    s2["one"] = f3;
+    s2["two"] = f2;
+    test:assertEquals(s2["one"], f3, msg = EXPECTED_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
+    test:assertEquals(s2["two"], f2, msg = EXPECTED_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
     test:assertTrue(s1 === s2, msg = EXPECTED_ORIGINAL_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
 }
 
@@ -75,10 +75,10 @@ function testRecordMutation() {
     string s = "test string 2";
 
     q1.fieldOne = i;
-    q1.fieldTwo = s;
+    q1["fieldTwo"] = s;
 
     test:assertEquals(q1.fieldOne, i, msg = EXPECTED_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
-    test:assertEquals(q1.fieldTwo, s, msg = EXPECTED_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
+    test:assertEquals(q1["fieldTwo"], s, msg = EXPECTED_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
     test:assertTrue(q1 === q2, msg = EXPECTED_ORIGINAL_VALUE_TO_BE_UPDATED_FAILURE_MESSAGE);
 }
 

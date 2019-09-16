@@ -35,7 +35,7 @@ function testSimpleValuesStoredInArrays() {
 @test:Config {}
 function testSimpleValuesStoredInTuples() {
     boolean b = B;
-    (int, boolean) s2 = (12, b);
+    [int, boolean] s2 = [12, b];
     b = false;
     test:assertEquals(s2[1], B, msg = "expected tuple member to not have changed");
 }
@@ -45,7 +45,7 @@ function testSimpleValuesStoredInMaps() {
     float f = F;
     map<float> s3 = { one: f, two: 2.00 };
     f = 3.0;
-    test:assertEquals(s3.one, F, msg = "expected map member to not have changed");
+    test:assertEquals(s3["one"], F, msg = "expected map member to not have changed");
 }
 
 public type FooRecord record {|

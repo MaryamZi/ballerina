@@ -121,11 +121,11 @@ function testAbstractClientObjectDeclaration() {
         msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "default visibility method to be accessible");
 
     _ = abstractClientObj->defaultVisibiltyRemoteMethodDecl("argOne", 25);
-    test:assertTrue(abstractClientObj.publicMethodDecl("argOne", 125, 25) == 400.0,
+    test:assertTrue(abstractClientObj.publicMethodDecl("argOne", 125, 25) == 325.0,
         msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public visibility method to be accessible");
 
     var result = abstractClientObj->publicRemoteMethodDecl("argOne", 125, 50);
-    test:assertEquals(result, 700.0,
+    test:assertEquals(result, 500.0,
         msg = EXPECTED_CLIENT_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public visibility remote method to be accessible");
 }
 

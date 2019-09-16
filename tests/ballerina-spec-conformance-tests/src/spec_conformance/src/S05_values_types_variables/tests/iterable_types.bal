@@ -30,7 +30,7 @@ function testIterableTypeArray() {
 
 @test:Config {}
 function testIterableTypeTuple() {
-    (int, string, boolean) iterableTuple = (100, "test string", true);
+    [int, string, boolean] iterableTuple = [100, "test string", true];
     int count = 0;
     foreach int|string|boolean variable in iterableTuple {
         count += 1;
@@ -42,7 +42,7 @@ function testIterableTypeTuple() {
 function testIterableTypeMap() {
     map<string> iterableMap = { fieldOne: "valueOne", fieldTwo: "valueTwo", fieldThree: "valueThree" };
     string result = "";
-    foreach (string, string) (key, value) in iterableMap {
+    foreach [string, string] [key, value] in iterableMap.entries() {
         result += value;
     }
     test:assertEquals(result, "valueOnevalueTwovalueThree", msg = "expected map to iterate over its members");
@@ -54,10 +54,10 @@ public type IterableRecord record {
 
 @test:Config {}
 function testIterableTypeRecord() {
-    IterableRecord iterableRecord = { bazFieldOne: 2.2, bazFieldTwo: true, bazFieldThree: "valueThree" };
+    IterableRecord iterableRecord = { bazFieldOne: 2.2, "bazFieldTwo": true, "bazFieldThree": "valueThree" };
     string result = "";
-    foreach (string, any) (key, value) in iterableRecord {
-        result += string.convert(value);
+    foreach [string, any] [key, value] in iterableRecord.entries() {
+        result += value.toString();
     }
     test:assertEquals(result, "2.2truevalueThree", msg = "expected record type to iterate over its fields");
 }

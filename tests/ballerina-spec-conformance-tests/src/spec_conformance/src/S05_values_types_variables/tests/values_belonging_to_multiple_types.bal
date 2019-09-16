@@ -32,7 +32,11 @@ function testValueBelongingToMultipleTypes() {
 
 function testIfValueIsOne(any value) {
     match value {
-        1 => test:assertTrue(true);
-        _ => test:assertFail(msg = "expected value to be 1");
+        1 => {
+            test:assertTrue(true);
+        }
+        _ => {
+            test:assertFail(msg = "expected value to be 1");
+        }
     }
 }

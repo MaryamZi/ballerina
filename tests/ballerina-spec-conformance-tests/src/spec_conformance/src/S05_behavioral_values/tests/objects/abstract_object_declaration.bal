@@ -103,6 +103,6 @@ function testAbstractObjectDeclaration() {
     test:assertTrue(abstractObj.defaultVisibiltyMethodDecl("argOne", 50) == (),
         msg = EXPECTED_ABSTRACT_OBJECT_FAILURE_MESSAGE + "default visibility method to be accessible");
 
-    test:assertTrue(abstractObj.publicMethodDecl("argOne", 125, 25) == 375.0,
+    test:assertTrue(abstractObj.publicMethodDecl("argOne", 125, 25) == 300.0,
         msg = EXPECTED_ABSTRACT_OBJECT_FAILURE_MESSAGE + "public visibility method to be accessible");
 }

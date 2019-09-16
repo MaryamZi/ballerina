@@ -48,8 +48,8 @@ function testModuleLevelAccessOfClientObject() {
         msg = "expected object private field to be accessible via an object method");
     test:assertEquals(clientObject.defaultVisibilityFloatField, 100.0, msg = "expected object public field");
 
-    test:assertEquals(clientObject.publicMethodDefn("argOne", 100, 150), 450.0, msg = "expected object public field");
+    test:assertEquals(clientObject.publicMethodDefn("argOne", 100, 150), 350.0, msg = "expected object public field");
 
-    test:assertEquals(clientObject.defaultVisibiltyMethodDefn("argOne", 50), 500.0,
+    test:assertEquals(clientObject.defaultVisibiltyMethodDefn("argOne", 50), 400.0,
         msg = "expected object public field");
 }

@@ -28,7 +28,7 @@ function testCyclicReferenceViaMutationInArrays() {
 
 @test:Config {}
 function testCyclicReferenceViaMutationInTuples() {
-    (int, anydata, float) b = (1, 2, 3.0);
+    [int, anydata, float] b = [1, 2, 3.0];
     b[1] = b;
     test:assertTrue(b === b[1], msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
 }
@@ -36,8 +36,8 @@ function testCyclicReferenceViaMutationInTuples() {
 @test:Config {}
 function testCyclicReferenceViaMutationInMaps() {
     map<any> c = { one: 1, two: 2.0 };
-    c.three = c;
-    test:assertTrue(c === c.three, msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
+    c["three"] = c;
+    test:assertTrue(c === c["three"], msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
 }
 
 public type QuxRecord record {
@@ -47,8 +47,8 @@ public type QuxRecord record {
 @test:Config {}
 function testCyclicReferenceViaMutationInRecords() {
     QuxRecord d = { quxFieldOne: 1.2 };
-    d.quxRecord = d;
-    test:assertTrue(d === d.quxRecord, msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
+    d["quxRecord"] = d;
+    test:assertTrue(d === d["quxRecord"], msg = EXPECTED_VALUES_TO_BE_AT_SAME_LOCATION_FAILURE_MESSAGE);
 }
 
 public type BarObjectOne object {
