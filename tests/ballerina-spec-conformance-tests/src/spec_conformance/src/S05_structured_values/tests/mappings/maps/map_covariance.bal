@@ -31,6 +31,6 @@ function testMapCovariance() {
     test:assertEquals(stringOrIntMap["two"], st2, msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
     test:assertEquals(stringOrIntMap["three"], st3, msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
     utils:assertPanic(function () { stringOrIntMap["four"] = 1; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      MAP_INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 }

@@ -27,7 +27,7 @@ function testMapInherentTypeViolation() {
     map<string> m1 = { one: "test string 1", two: "test string 2" };
     map<any> anyMap = m1;
     utils:assertPanic(function() { anyMap["three"] = 3; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      MAP_INHERENT_TYPE_VIOLATION_REASON,
                       "invalid reason on inherent type violating map insertion");
 
     map<map<string>> m2 = { one: { strOne: "test string 1", strTwo: "test string 2" } };
@@ -35,6 +35,6 @@ function testMapInherentTypeViolation() {
     // `m3` looks like `map<string>`
     map<string|int> m3 = { one: "test string 1", two: "test string 2" };
     utils:assertPanic(function() { anyMap["two"] = m3; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      MAP_INHERENT_TYPE_VIOLATION_REASON,
                       "invalid reason on inherent type violating map insertion");
 }

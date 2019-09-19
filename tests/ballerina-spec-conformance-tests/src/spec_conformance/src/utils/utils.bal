@@ -23,9 +23,16 @@ import ballerina/test;
 # + func - the function to call
 # + expectedReason - the reason the error is expected to have
 # + invalidReasonFailureMessage - the failure message on reason mismatch
-public function assertPanic(function() returns any|error func, string expectedReason,
+public function assertPanic(((function() returns any|error)|(function())) func, string expectedReason,
                             string invalidReasonFailureMessage) {
-    var result = trap func();
+    any|error result;
+
+    if (func is function()) {
+        result = trap func();
+    } else {
+        result = trap func();
+    }
+
     if (result is error) {
         test:assertEquals(result.reason(), expectedReason, msg = invalidReasonFailureMessage);
     } else {

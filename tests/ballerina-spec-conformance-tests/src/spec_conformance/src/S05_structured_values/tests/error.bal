@@ -46,8 +46,8 @@ function testErrorDetailFrozenness() {
     error<string, record {| string message?; error cause?; |}> error1 = error("Error Three", message = "Core Error");
     utils:assertPanic(function () { 
                         record {| anydata|error...; |} det = error1.detail();
-                        det["key1"] = 1.0;
+                        det["message"] = "new message";
                       },
-                      "{ballerina}InvalidUpdate",
+                      "{ballerina/lang.map}InvalidUpdate",
                       "invalid error on error detail update");
 }

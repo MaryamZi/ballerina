@@ -48,7 +48,7 @@ service q = service {
     resource function mockResource() {
     }
 };
-typedesc<any> r = json;
+//typedesc<any> r = json;
 
 type s 1;
 float|boolean t = e;
@@ -97,7 +97,7 @@ function anyValueDataProvider() returns any[][] {
         [o],
         [p],
         [q],
-        [r],
+        //[r], https://github.com/ballerina-platform/ballerina-lang/issues/19105
         [s],
         [t],
         [u],

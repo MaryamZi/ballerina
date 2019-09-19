@@ -17,7 +17,7 @@
 import ballerina/test;
 import utils;
 
-const INHERENT_TYPE_VIOLATION_REASON = "{ballerina}InherentTypeViolation";
+const ARRAY_INHERENT_TYPE_VIOLATION_REASON = "{ballerina/lang.array}InherentTypeViolation";
 const string INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE =
                                             "invalid reason on inherent type violating array insertion";
 
@@ -31,7 +31,7 @@ function testBasicTypeArrayInherentTypeViolation() {
     int[] intArray = [1, 2];
     any[] anyArray = intArray;
     utils:assertPanic(function() { anyArray[intArray.length() - 1] = "not an int"; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      ARRAY_INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 
     string[][] string2DArray = [["test string 1", "test string 2"], ["test string 3"]];
@@ -40,7 +40,7 @@ function testBasicTypeArrayInherentTypeViolation() {
     // `stringOrIntArray` looks like `string[]`
     (string|int)[2] stringOrIntArray = ["test string 1", "test string 2"];
     utils:assertPanic(function() { anyArray[0] = stringOrIntArray; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      ARRAY_INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 }
 
@@ -49,7 +49,7 @@ function testRecordArrayInherentTypeViolation() {
     FooRecordOne[] fooRecordArray = [<FooRecordOne>{ fooFieldOne: "test string 1" }];
     any[] anyArray = fooRecordArray;
     utils:assertPanic(function() { anyArray[fooRecordArray.length() - 1] = <BarRecordOne> { barFieldOne: 1 }; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      ARRAY_INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 
     map<FooRecordOne>[] fooRecordMapArray = [
@@ -68,7 +68,7 @@ function testRecordArrayInherentTypeViolation() {
         one: <FooRecordOne>{ fooFieldOne: "test string 1" }
     };
     utils:assertPanic(function() { anyArray[0] = fooRecordOrBarRecordMap; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      ARRAY_INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 }
 
@@ -82,7 +82,7 @@ function testObjectArrayInherentTypeViolation() {
 
     BarObjectOne b1 = new(1);
     utils:assertPanic(function() { anyArray[0] = b1; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      ARRAY_INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 
     map<FooObjectOne>[] fooObjectMapArray = [
@@ -101,7 +101,7 @@ function testObjectArrayInherentTypeViolation() {
         one: f1
     };
     utils:assertPanic(function() { anyArray[0] = fooObjectOneOrBarObjectOneMap; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      ARRAY_INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 }
 

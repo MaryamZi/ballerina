@@ -52,7 +52,9 @@ function testXmlAttributes() {
 
 // The content of each element in the sequence is itself a distinct XML value.
 // Although the sequence is immutable, an element can be mutated to change its content to be another XML value.
-@test:Config {}
+@test:Config {
+    enable: false // https://github.com/ballerina-platform/ballerina-lang/issues/19092
+}
 function testXmlSequenceElements() {
     xml xmlElement1 = xml `<book status="available">The Lost World</book>`;
     xml xmlElement2 = xml `<author>Arthur Conan Doyle</author>`;

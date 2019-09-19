@@ -32,7 +32,7 @@ function testArrayCovariance() {
     test:assertEquals(stringOrIntArray[1], "string two", msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
     test:assertEquals(stringOrIntArray[2], "string three", msg = EXPECTED_THE_ORIGINAL_VALUE_FAILURE_MESSAGE);
     utils:assertPanic(function () { stringOrIntArray[0] = 1; },
-                      INHERENT_TYPE_VIOLATION_REASON,
+                      ARRAY_INHERENT_TYPE_VIOLATION_REASON,
                       INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_ARRAY_INSERTION_FAILURE_MESSAGE);
 }
 

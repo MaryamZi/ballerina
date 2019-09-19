@@ -17,7 +17,6 @@
 import ballerina/test;
 import utils;
 
-const B7A_INVALID_UPDATE_REASON = "{ballerina}InvalidUpdate";
 const IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE = "invalid reason on immutable value update";
 
 const EXPECTED_VALUE_TO_NOT_BE_FROZEN_FAILURE_MESSAGE = "exected value to not be frozen";
@@ -47,7 +46,7 @@ const EXPECTED_TO_NOT_BE_ABLE_TO_ADD_VALUE_NOT_OF_SAME_OR_SUB_TYPE_FAILURE_MESSA
 function testArrayFreezeOnContainer() {
     int[] a1 = [1, 2, 3];
     int[] a2 = a1.cloneReadOnly();
-    utils:assertPanic(function () { insertMemberToArray(a2, 0, 1); }, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(function () { insertMemberToArray(a2, 0, 1); }, "{ballerina/lang.array}InvalidUpdate",
                             IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 
@@ -64,7 +63,7 @@ function insertMemberToArray(any[] array, int index, any member) {
 function testTupleFreezeOnContainer() {
     [int, boolean] a2 = [1, false];
     [int, boolean] a3 = a2.cloneReadOnly();
-    utils:assertPanic(function () { insertMemberToTuple(a3, 2); }, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(function () { insertMemberToTuple(a3, 2); }, "{ballerina/lang.array}InvalidUpdate",
                             IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 
@@ -82,7 +81,7 @@ function testMapFreezeOnContainer() {
     var result = a3.cloneReadOnly();
     var trappedResult = trap insertMemberToMap(result, "two", 2);
     if (trappedResult is error) {
-        test:assertEquals(trappedResult.reason(), B7A_INVALID_UPDATE_REASON,
+        test:assertEquals(trappedResult.reason(), "{ballerina/lang.map}InvalidUpdate",
             msg = IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
     } else {
         test:assertFail(msg = "expected expression to panic");
@@ -102,7 +101,7 @@ function insertMemberToMap(map<any|error> mapVal, string index, any|error member
 function testRecordFreezeOnContainer() {
     FooRecordThirteen a4 = { fooFieldOne: "test string 1" };
     FooRecordThirteen a5 = a4.cloneReadOnly();
-    utils:assertPanic(function () { updateFooRecord(a5, "test string 2"); }, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(function () { updateFooRecord(a5, "test string 2"); }, "{ballerina/lang.map}InvalidUpdate",
                             IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 
@@ -119,7 +118,7 @@ function testTableFreezeOnContainer() {
     table<BarRecordThirteen> a5 = table{};
     BarRecordThirteen b1 = { barFieldOne: 100 };
     table<BarRecordThirteen> a6 = a5.cloneReadOnly();
-    utils:assertPanic(function () { insertMemberToTable(a6, b1); }, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(function () { insertMemberToTable(a6, b1); }, "{ballerina/lang.table}InvalidUpdate",
                             IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 
@@ -345,10 +344,10 @@ function testArrayFrozenContainerShapeAndType() {
         msg = "expected value's type to not be of same type or sub type");
 
     (int|string)?[] a3 = a2.cloneReadOnly();
-    result = trap insertMemberToArray(a1, a1.length() - 1, a3);
+    var result2 = trap insertMemberToArray(a1, a1.length() - 1, a3);
     test:assertTrue(a3 is int[],
         msg = "expected value's type to match shape after freezing");
-     test:assertTrue(!(result is error),
+     test:assertTrue(!(result2 is error),
                      msg = "expected to be able to add a frozen value that conforms to shape");
 }
 
@@ -363,10 +362,10 @@ function testTupleFrozenContainerShapeAndType() {
         msg = "expected value's type to not be of same type or sub type");
 
     [int|float, string] a5 = a4.cloneReadOnly();
-    result = trap insertMemberToTuple(a3, a5);
+    var result2 = trap insertMemberToTuple(a3, a5);
     test:assertTrue(a5 is [int, string],
         msg = "expected value's type to match shape after freezing");
-    test:assertTrue(!(result is error),
+    test:assertTrue(!(result2 is error),
         msg = "expected to be able to add a frozen value that conforms to shape");
 }
 
@@ -380,9 +379,9 @@ function testRecordFrozenContainerShapeAndType() {
     test:assertTrue(!(a10 is BazRecord), msg = "expected value's type to not be of same type or sub type");
 
     anydata a11 = a10.cloneReadOnly();
-    result = trap updateRecordBazField(a8, a11);
+    var result2 = trap updateRecordBazField(a8, a11);
     test:assertTrue(a11 is BazRecord, msg = "expected value's type to match shape after freezing");
-    test:assertTrue(!(result is error), msg = "expected to be able to add a frozen value that conforms to shape");
+    test:assertTrue(!(result2 is error), msg = "expected to be able to add a frozen value that conforms to shape");
 }
 
 @test:Config {}
@@ -397,10 +396,10 @@ function testMapFrozenContainerShapeAndType() {
         msg = "expected value's type to not be of same type or sub type");
 
     anydata a8 = a7.cloneReadOnly();
-    result = trap insertMemberToMap(a5, "three", a8);
+    var result2 = trap insertMemberToMap(a5, "three", a8);
     test:assertTrue(a8 is map<string>|float,
         msg = "expected value's type to match shape after freezing");
-    test:assertTrue(!(result is error),
+    test:assertTrue(!(result2 is error),
         msg = "expected to be able to add a frozen value that conforms to shape");
 }
 

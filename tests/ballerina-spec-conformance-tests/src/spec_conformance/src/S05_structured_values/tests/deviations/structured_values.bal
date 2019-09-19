@@ -25,19 +25,19 @@ import utils;
     groups: ["deviation"]
 }
 function testFreezeOnContainerBroken() {
-    utils:assertPanic(testFrozenArrayUpdateBroken, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(testFrozenArrayUpdateBroken, "{ballerina/lang.array}InvalidUpdate",
                       IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 
-    utils:assertPanic(testFrozenTupleUpdateBroken, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(testFrozenTupleUpdateBroken, "{ballerina/lang.array}InvalidUpdate",
                       IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 
-    utils:assertPanic(testFrozenMapUpdateBroken, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(testFrozenMapUpdateBroken, "{ballerina/lang.map}InvalidUpdate",
                       IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 
-    utils:assertPanic(testFrozenRecordUpdateBroken, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(testFrozenRecordUpdateBroken, "{ballerina/lang.map}InvalidUpdate",
                       IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 
-    utils:assertPanic(testFrozenTableUpdateBroken, B7A_INVALID_UPDATE_REASON,
+    utils:assertPanic(testFrozenTableUpdateBroken, "{ballerina/lang.table}InvalidUpdate",
                       IMMUTABLE_VALUE_UPDATE_INVALID_REASON_MESSAGE);
 }
 

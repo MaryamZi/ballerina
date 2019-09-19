@@ -17,7 +17,7 @@
 import ballerina/test;
 import utils;
 
-const INDEX_OUT_OF_RANGE_REASON = "{ballerina}IndexOutOfRange";
+const INDEX_OUT_OF_RANGE_REASON = "{ballerina/lang.array}IndexOutOfRange";
 const INVALID_REASON_ON_ACCESS_BY_NEGATIVE_INDEX_FAILURE_MESSAGE = "invalid reason on access by negative index";
 const INVALID_REASON_ON_ACCESS_BY_ARRAY_LENGTH_INDEX_FAILURE_MESSAGE =
                                                                 "invalid reason on access by index == array length";

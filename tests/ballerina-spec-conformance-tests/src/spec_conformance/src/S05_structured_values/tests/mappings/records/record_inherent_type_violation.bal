@@ -29,12 +29,12 @@ const INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_RECORD_UPDATE_FAILURE_MESSAGE =
 function testRecordInherentTypeViolation() {
     map<string> m1 = { one: "test string 1", two: "test string 2" };
     ClosedRecordWithMapField r1 = { mapField: m1 };
-    utils:assertPanic(function () { updateClosedRecordWithMapField(r1, 1); }, INHERENT_TYPE_VIOLATION_REASON,
+    utils:assertPanic(function () { updateClosedRecordWithMapField(r1, 1); }, MAP_INHERENT_TYPE_VIOLATION_REASON,
                             INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_RECORD_UPDATE_FAILURE_MESSAGE);
 
     // `m2` looks like `map<string>`
     map<string|int> m2 = { one: "test string 1", two: "test string 2" };
-    utils:assertPanic(function () { updateClosedRecordWithMapField(r1, m2); }, INHERENT_TYPE_VIOLATION_REASON,
+    utils:assertPanic(function () { updateClosedRecordWithMapField(r1, m2); }, MAP_INHERENT_TYPE_VIOLATION_REASON,
                             INVALID_REASON_ON_INHERENT_TYPE_VIOLATING_RECORD_UPDATE_FAILURE_MESSAGE);
 }
 

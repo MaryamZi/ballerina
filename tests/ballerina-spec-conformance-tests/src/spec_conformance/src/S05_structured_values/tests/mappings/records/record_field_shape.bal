@@ -16,7 +16,7 @@
 
 import ballerina/test;
 
-const CONVERSION_ERROR_REASON = "{ballerina}ConversionError";
+const CONVERSION_ERROR_REASON = "{ballerina/lang.typedesc}ConversionError";
 
 // The shape of a mapping value is an unordered collection of field shapes one for each field.
 // The field shape for a field f has a name, which is the same as the name of f, and a shape,

@@ -17,6 +17,8 @@
 import ballerina/test;
 import utils;
 
+const MAP_INHERENT_TYPE_VIOLATION_REASON = "{ballerina/lang.map}InherentTypeViolation";
+
 string s1 = "test string 1";
 int i1 = 100;
 
@@ -52,11 +54,11 @@ public type BarRecord record {
 @test:Config {}
 function testRecordFieldValueTypeConformance() {
     FooRecord f = { fieldOne: s1, fieldTwo: i1 };
-    utils:assertPanic(function () { updateRecordFieldOne(f, i1); }, INHERENT_TYPE_VIOLATION_REASON,
+    utils:assertPanic(function () { updateRecordFieldOne(f, i1); }, MAP_INHERENT_TYPE_VIOLATION_REASON,
                             "invalid reason on inherent type violating record update");
 
     BarRecord b = { fieldOne: s1, fieldThree: 1.0 };
-    utils:assertPanic(function () { updateRecordFieldOne(b, i1); }, INHERENT_TYPE_VIOLATION_REASON,
+    utils:assertPanic(function () { updateRecordFieldOne(b, i1); }, MAP_INHERENT_TYPE_VIOLATION_REASON,
                             "invalid reason on inherent type violating record update");
 }
 
@@ -79,7 +81,7 @@ function testRequiredFields() {
     map<anydata> b2 = { fieldOne: "test string 1" };
     result = FooRecord.constructFrom(b2);
     if (result is error) {
-        test:assertEquals(result.reason(), "{ballerina}ConversionError",
+        test:assertEquals(result.reason(), "{ballerina/lang.typedesc}ConversionError",
             msg = "expected conversion to fail due to missing fields");
     } else {
         test:assertFail(msg = "expected conversion to fail since all required fields are not present");
