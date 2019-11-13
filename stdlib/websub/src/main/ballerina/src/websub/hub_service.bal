@@ -498,18 +498,18 @@ function distributeContent(string callback, SubscriptionDetails subscriptionDeta
             }
         }
     } else {
-        var result = request.getTextPayload();
-        string stringPayload = result is error ? "" : result;
+        var result = request.getBinaryPayload();
 
-        if (subscriptionDetails.secret != "") {
+        if result is error {
+            log:printError("Error retrieving payload for signature computation, delivering content without the signature",
+                            result);
+        } else {
             string xHubSignature = hubSignatureMethod + "=";
             string generatedSignature = "";
             if (stringutils:equalsIgnoreCase(SHA1, hubSignatureMethod)) { //not recommended
-                generatedSignature = crypto:hmacSha1(stringPayload.toBytes(),
-                    subscriptionDetails.secret.toBytes()).toBase16();
+                generatedSignature = crypto:hmacSha1(result, subscriptionDetails.secret.toBytes()).toBase16();
             } else if (stringutils:equalsIgnoreCase(SHA256, hubSignatureMethod)) {
-                generatedSignature = crypto:hmacSha256(stringPayload.toBytes(),
-                    subscriptionDetails.secret.toBytes()).toBase16();
+                generatedSignature = crypto:hmacSha256(result, subscriptionDetails.secret.toBytes()).toBase16();
             }
             xHubSignature = xHubSignature + generatedSignature;
             request.setHeader(X_HUB_SIGNATURE, xHubSignature);
