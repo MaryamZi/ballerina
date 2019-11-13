@@ -232,6 +232,7 @@ function getHubService() returns service {
                 if (responseError is error) {
                     log:printError("Error responding to request", responseError);
                 }
+                return;
             }
 
             boolean validSubscriptionChangeRequest = false;
