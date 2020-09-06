@@ -1004,8 +1004,7 @@ public class BLangNodeTransformer extends NodeTransformer<BLangNode> {
         Optional<Node> doc = getDocumentationString(objFieldNode.metadata());
         simpleVar.markdownDocumentationAttachment = createMarkdownDocumentationAttachment(doc);
 
-        // TODO: add changes for `final`
-//        addRedonlyQualifier(objFieldNode.readonlyKeyword(), objFieldNode.typeName(), simpleVar);
+        addFinalQualifier(objFieldNode.finalKeyword(), simpleVar);
         simpleVar.pos = getPositionWithoutMetadata(objFieldNode);
         return simpleVar;
     }
@@ -5029,6 +5028,14 @@ public class BLangNodeTransformer extends NodeTransformer<BLangNode> {
             this.pos = pos;
             return this;
         }
+    }
+
+    private void addFinalQualifier(Optional<Token> finalKeyword, BLangSimpleVariable simpleVar) {
+        if (!finalKeyword.isPresent()) {
+            return;
+        }
+
+        simpleVar.flagSet.add(Flag.FINAL);
     }
 
     private void addToTop(TopLevelNode topLevelNode) {
