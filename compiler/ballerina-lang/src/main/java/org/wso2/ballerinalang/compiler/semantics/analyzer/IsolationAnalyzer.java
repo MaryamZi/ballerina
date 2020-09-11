@@ -26,6 +26,7 @@ import org.ballerinalang.model.tree.expressions.RecordLiteralNode;
 import org.ballerinalang.util.diagnostic.DiagnosticCode;
 import org.wso2.ballerinalang.compiler.semantics.model.SymbolEnv;
 import org.wso2.ballerinalang.compiler.semantics.model.SymbolTable;
+import org.wso2.ballerinalang.compiler.semantics.model.symbols.BInvokableSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.Symbols;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
@@ -232,6 +233,10 @@ public class IsolationAnalyzer extends BLangNodeVisitor {
             analyzeNode(function, env);
         }
 
+        for (BLangSimpleVariable globalVar : pkgNode.globalVars) {
+            analyzeNode(globalVar, env);
+        }
+
         pkgNode.completedPhases.add(CompilerPhase.ISOLATION_ANALYZE);
     }
 
@@ -282,14 +287,6 @@ public class IsolationAnalyzer extends BLangNodeVisitor {
 
     @Override
     public void visit(BLangService serviceNode) {
-        SymbolEnv serviceEnv = SymbolEnv.createServiceEnv(serviceNode, serviceNode.symbol.scope, env);
-        for (BLangExpression attachedExpr : serviceNode.attachedExprs) {
-            analyzeNode(attachedExpr, serviceEnv);
-        }
-
-        for (BLangFunction resourceFunction : serviceNode.resourceFunctions) {
-            analyzeNode(resourceFunction, serviceEnv);
-        }
     }
 
     @Override
@@ -309,7 +306,13 @@ public class IsolationAnalyzer extends BLangNodeVisitor {
 
     @Override
     public void visit(BLangSimpleVariable varNode) {
-        analyzeNode(varNode.typeNode, env);
+        BLangType typeNode = varNode.typeNode;
+        if (typeNode != null &&
+                (typeNode.type == null || typeNode.type.tsymbol.owner.getKind() != SymbolKind.PACKAGE)) {
+            // Only analyze the type node if it is not available at module level, since module level type definitions
+            // have already been analyzed.
+            analyzeNode(typeNode, env);
+        }
 
         BLangExpression expr = varNode.expr;
         if (expr == null) {
@@ -645,12 +648,35 @@ public class IsolationAnalyzer extends BLangNodeVisitor {
         BSymbol symbol = varRefExpr.symbol;
         BLangInvokableNode enclInvokable = env.enclInvokable;
 
-        if (symbol == null || enclInvokable == null) {
+        if (symbol == null) {
             return;
         }
 
-        if (symbol.owner == enclInvokable.symbol) {
-            return;
+        boolean inIsolatedInvokable;
+
+        if (enclInvokable == null) {
+            // TODO: 9/11/20 This feels hack-y but cannot think of a different approach without a class variable
+            // maintaining isolated-ness.
+            if (env.node.getKind() != NodeKind.EXPR_FUNCTION_BODY || 
+                    env.enclEnv.node.getKind() != NodeKind.ARROW_EXPR) {
+                return;
+            }
+
+            BLangArrowFunction bLangArrowFunction = (BLangArrowFunction) env.enclEnv.node;
+
+            for (BLangSimpleVariable param : bLangArrowFunction.params) {
+                if (param.symbol == symbol) {
+                    return;
+                }
+            }
+
+            inIsolatedInvokable = Symbols.isFlagOn(bLangArrowFunction.funcType.flags, Flags.ISOLATED);
+        } else {
+            BInvokableSymbol enclosingInvokableSymbol = enclInvokable.symbol;
+            if (symbol.owner == enclosingInvokableSymbol) {
+                return;
+            }
+            inIsolatedInvokable = Symbols.isFlagOn(enclosingInvokableSymbol.flags, Flags.ISOLATED);
         }
 
         if (Symbols.isFlagOn(symbol.flags, Flags.FINAL) &&
@@ -660,7 +686,7 @@ public class IsolationAnalyzer extends BLangNodeVisitor {
 
         inferredIsolated = false;
 
-        if (Symbols.isFlagOn(enclInvokable.symbol.flags, Flags.ISOLATED)) {
+        if (inIsolatedInvokable) {
             dlog.error(varRefExpr.pos, DiagnosticCode.INVALID_MUTABLE_ACCESS_IN_ISOLATED_FUNCTION);
         }
     }
@@ -885,10 +911,8 @@ public class IsolationAnalyzer extends BLangNodeVisitor {
 
     @Override
     public void visit(BLangArrowFunction bLangArrowFunction) {
-        for (BLangSimpleVariable param : bLangArrowFunction.params) {
-            analyzeNode(param, env);
-        }
-        analyzeNode(bLangArrowFunction.body, env);
+        SymbolEnv arrowFunctionEnv = SymbolEnv.createArrowFunctionSymbolEnv(bLangArrowFunction, env);
+        analyzeNode(bLangArrowFunction.body, arrowFunctionEnv);
     }
 
     @Override

@@ -59,8 +59,10 @@ public class IsolationAnalysisTest {
                 "testIsolatedFunctionAccessingImmutableGlobalStorage",
                 "testIsolatedObjectMethods",
                 "testNonIsolatedMethodAsIsolatedMethodRuntimeNegative",
+                "testIsolatedFunctionPointerInvocation",
                 "testIsolatedFunctionAsIsolatedFunctionRuntime",
-                "testIsolatedFunctionAsIsolatedFunctionRuntimeNegative"
+                "testIsolatedFunctionAsIsolatedFunctionRuntimeNegative",
+                "testIsolatedArrowFunctions"
         };
     }
 
@@ -127,6 +129,9 @@ public class IsolationAnalysisTest {
         validateError(result, i++, INVALID_NON_ISOLATED_FUNCTION_CALL_ERROR, 174, 17);
         validateError(result, i++, INVALID_MUTABLE_STORAGE_ACCESS_ERROR, 174, 33);
         validateError(result, i++, INVALID_MUTABLE_STORAGE_ACCESS_ERROR, 175, 20);
+        validateError(result, i++, INVALID_MUTABLE_STORAGE_ACCESS_ERROR, 182, 34);
+        validateError(result, i++, INVALID_MUTABLE_STORAGE_ACCESS_ERROR, 185, 34);
+        validateError(result, i++, INVALID_MUTABLE_STORAGE_ACCESS_ERROR, 188, 56);
         Assert.assertEquals(result.getErrorCount(), i);
     }
 }
