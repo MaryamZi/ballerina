@@ -281,3 +281,42 @@ isolated class IsolatedClassWithValidCopyInInsideBlock {
         }
     }
 }
+
+isolated class IsolatedClassWithBoundMethodAccesss {
+    private int i = 1;
+    private map<int> j = {};
+
+    function testIsolatedObjectMethodWithBoundMethodAccess() {
+        IsolatedObjectWithIsolatedMethod x = new;
+        (function () returns int)? intFunc = ();
+        lock {
+            isolated function () returns int func1 = x.func;
+            self.i = func1();
+
+            IsolatedObjectWithIsolatedMethod y = new IsolatedObjectWithIsolatedMethod();
+            intFunc = y.func;
+
+            NonIsolatedObjectWithIsolatedMethod z = new;
+            self.j = z.func();
+        }
+    }
+
+    function testIsolatedObjectMethodWithBoundMethodAccessWithoutMutableFieldAccess() {
+        NonIsolatedObjectWithIsolatedMethod x = new;
+        lock {
+            isolated function () returns map<int> func1 = x.func;
+
+            NonIsolatedObjectWithIsolatedMethod y = new;
+            function () returns map<int> func2 = y.func;
+        }
+        isolated function () returns map<int> func3 = x.func;
+    }
+}
+
+isolated class IsolatedObjectWithIsolatedMethod {
+    isolated function func() returns int => 1;
+}
+
+class NonIsolatedObjectWithIsolatedMethod {
+    isolated function func() returns map<int> & readonly => {};
+}

@@ -374,3 +374,29 @@ isolated class InvalidIsolatedClassWithCopyInInsideBlock {
         }
     }
 }
+
+isolated class InvalidIsolatedClassWithNonIsolatedBoundMethodAccesss {
+    private int i = 1;
+
+    function foo() {
+        NonIsolatedObjectWithIsolatedMethod x = new;
+        (function () returns map<int>)? intMapFunc = ();
+        lock {
+            isolated function () returns int func1 = x.func;
+            self.i = func1();
+
+            object {
+                function func() returns map<int>;
+            } y = new NonIsolatedObjectWithNonIsolatedMethod();
+            intMapFunc = y.func;
+        }
+    }
+}
+
+class NonIsolatedObjectWithIsolatedMethod {
+    isolated function func() returns int => 1;
+}
+
+class NonIsolatedObjectWithNonIsolatedMethod {
+    function func() returns map<int> => {};
+}

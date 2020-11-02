@@ -129,6 +129,8 @@ public class IsolatedObjectTest {
         validateError(result, i++, "invalid access of a mutable field of an 'isolated' object outside a 'lock' " +
                 "statement", 346, 9);
         validateError(result, i++, "invalid attempt to copy a mutable value into an 'isolated' object", 372, 40);
+        validateError(result, i++, "invalid attempt to copy a mutable value into an 'isolated' object", 385, 54);
+        validateError(result, i++, "invalid attempt to copy out a mutable value from an 'isolated' object", 391, 26);
         Assert.assertEquals(result.getErrorCount(), i);
     }
 

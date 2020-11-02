@@ -2387,7 +2387,11 @@ public class IsolationAnalyzer extends BLangNodeVisitor {
     private boolean isInvalidCopyingOfMutableValueInIsolatedObject(BLangExpression expression, boolean copyOut,
                                                                    boolean invokedOnSelf) {
         BType type = expression.type;
-        if (Symbols.isFlagOn(type.flags, Flags.READONLY)) {
+
+        boolean boundMethodAccess = expression.getKind() == NodeKind.FIELD_BASED_ACCESS_EXPR &&
+                Symbols.isFlagOn(((BLangFieldBasedAccess) expression).symbol.flags, Flags.ATTACHED);
+
+        if (!boundMethodAccess && Symbols.isFlagOn(type.flags, Flags.READONLY)) {
             return false;
         }
 
@@ -2395,11 +2399,18 @@ public class IsolationAnalyzer extends BLangNodeVisitor {
 
         NodeKind kind = parent.getKind();
         if (!(parent instanceof BLangExpression)) {
-            if (isIsolatedObjectTypes(type)) {
-                return false;
-            }
+            if (boundMethodAccess) {
+                BInvokableSymbol invokableSymbol = (BInvokableSymbol) ((BLangFieldBasedAccess) expression).symbol;
+                if (isIsolated(invokableSymbol.flags) && isIsolatedObjectTypes(invokableSymbol.receiverSymbol.type)) {
+                    return false;
+                }
 
-            if (expression.getKind() == NodeKind.INVOCATION &&
+                if (!copyOut) {
+                    return true;
+                }
+            } else if (isIsolatedObjectTypes(type)) {
+                return false;
+            } else if (expression.getKind() == NodeKind.INVOCATION &&
                     isCloneOrCloneReadOnlyInvocation(((BLangInvocation) expression))) {
                 return false;
             }
