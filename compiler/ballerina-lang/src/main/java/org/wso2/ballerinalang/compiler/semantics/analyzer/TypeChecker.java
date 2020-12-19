@@ -7575,8 +7575,7 @@ public class TypeChecker extends BLangNodeVisitor {
 
         for (BField field : actualObjectType.fields.values()) {
             BType fieldType = field.type;
-            if (!types.isInherentlyImmutableType(fieldType) &&
-                    !types.isSelectivelyImmutableType(fieldType, false, false)) {
+            if (!types.isInherentlyImmutableType(fieldType) && !types.isSelectivelyImmutableType(fieldType, false)) {
                 semanticAnalyzer.analyzeNode(classDefForConstructor, env);
                 hasNeverReadOnlyField = true;
 
