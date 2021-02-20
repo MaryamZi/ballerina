@@ -56,7 +56,8 @@ public class ModuleErrorVariableTest {
                 "testErrorVarWithAnnotations",
                 "testVariableForwardReferencing",
                 "testErrorVarWithRestVariable",
-                "testErrorVarDeclaredWithVar"
+                "testErrorVarDeclaredWithVar",
+                "testErrorVarDeclaredWithVar2"
         };
     }
 
@@ -79,6 +80,10 @@ public class ModuleErrorVariableTest {
                 "invalid error constructor, error details does not match", 39, 78);
         validateError(compileResultNegetive, index++,
                 "incompatible types: expected 'string', found 'other'", 40, 69);
+        validateError(compileResultNegetive, index++,
+                "invalid record binding pattern with type '[int]'", 53, 33);
+        validateError(compileResultNegetive, index++,
+                "missing error detail arg for error detail field 'fieldB'", 56, 9);
         assertEquals(compileResultNegetive.getErrorCount(), index);
     }
 

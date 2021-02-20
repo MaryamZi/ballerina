@@ -56,6 +56,7 @@ import org.wso2.ballerinalang.compiler.semantics.model.symbols.Symbols;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BArrayType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BErrorType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BField;
+import org.wso2.ballerinalang.compiler.semantics.model.types.BIntersectionType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BInvokableType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BMapType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BObjectType;
@@ -176,6 +177,7 @@ import org.wso2.ballerinalang.compiler.tree.types.BLangErrorType;
 import org.wso2.ballerinalang.compiler.tree.types.BLangFiniteTypeNode;
 import org.wso2.ballerinalang.compiler.tree.types.BLangObjectTypeNode;
 import org.wso2.ballerinalang.compiler.tree.types.BLangRecordTypeNode;
+import org.wso2.ballerinalang.compiler.tree.types.BLangTableTypeNode;
 import org.wso2.ballerinalang.compiler.tree.types.BLangType;
 import org.wso2.ballerinalang.compiler.util.BArrayState;
 import org.wso2.ballerinalang.compiler.util.CompilerContext;
@@ -463,6 +465,7 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
         if (typeDefinition.typeNode.getKind() == NodeKind.OBJECT_TYPE
                 || typeDefinition.typeNode.getKind() == NodeKind.RECORD_TYPE
                 || typeDefinition.typeNode.getKind() == NodeKind.ERROR_TYPE
+                || typeDefinition.typeNode.getKind() == NodeKind.TABLE_TYPE
                 || typeDefinition.typeNode.getKind() == NodeKind.FINITE_TYPE_NODE) {
             analyzeDef(typeDefinition.typeNode, env);
         }
@@ -620,6 +623,28 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
 
         this.dlog.error(objectTypeNode.initFunction.pos, DiagnosticErrorCode.ABSTRACT_OBJECT_CONSTRUCTOR,
                 objectTypeNode.symbol.name);
+    }
+
+    @Override
+    public void visit(BLangTableTypeNode tableTypeNode) {
+        BType constraint = tableTypeNode.constraint.type;
+        if (!types.isAssignable(constraint, symTable.mapAllType)) {
+            dlog.error(tableTypeNode.constraint.pos, DiagnosticErrorCode.TABLE_CONSTRAINT_INVALID_SUBTYPE, constraint);
+            return;
+        }
+
+        if (constraint.tag == TypeTags.MAP) {
+            typeChecker.validateMapConstraintTable(null, tableTypeNode.tableType);
+            return;
+        }
+
+        List<String> fieldNameList = tableTypeNode.tableType.fieldNameList;
+        if (fieldNameList != null) {
+            typeChecker.validateKeySpecifier(fieldNameList,
+                    constraint.tag != TypeTags.INTERSECTION ? constraint :
+                            ((BIntersectionType) constraint).effectiveType,
+                    tableTypeNode.tableKeySpecifier.pos);
+        }
     }
 
     @Override
@@ -1194,11 +1219,13 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
                     variable.type = symTable.semanticError;
                     return;
                 }
+
                 BLangErrorVariable errorVariable = (BLangErrorVariable) variable;
                 if (errorVariable.typeNode != null) {
                     symResolver.resolveTypeNode(errorVariable.typeNode, env);
                 }
                 errorVariable.type = rhsType;
+
                 if (!this.symbolEnter.symbolEnterAndValidateErrorVariable(errorVariable, env)) {
                     errorVariable.type = symTable.semanticError;
                     return;

@@ -3112,6 +3112,8 @@ public class BLangNodeTransformer extends NodeTransformer<BLangNode> {
                 tableTypeNode.tableKeySpecifier = (BLangTableKeySpecifier) constraintNode.apply(this);
             }
         }
+
+        tableTypeNode.isTypeInlineDefined = checkIfAnonymous(tableTypeDescriptorNode);
         return tableTypeNode;
     }
 

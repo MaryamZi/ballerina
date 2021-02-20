@@ -22,6 +22,7 @@ import io.ballerina.tools.diagnostics.Location;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.ballerinalang.compiler.CompilerPhase;
 import org.ballerinalang.model.TreeBuilder;
+import org.ballerinalang.model.elements.AttachPoint;
 import org.ballerinalang.model.elements.Flag;
 import org.ballerinalang.model.elements.PackageID;
 import org.ballerinalang.model.symbols.SymbolKind;
@@ -1292,10 +1293,14 @@ public class Desugar extends BLangNodeVisitor {
 
     public void visit(BLangAnnotationAttachment annAttachmentNode) {
         annAttachmentNode.expr = rewrite(annAttachmentNode.expr, env);
-        // TODO: need to check this. Bala creation in java module fails in java11 migration.
-//        if (annAttachmentNode.expr != null) {
-//            annAttachmentNode.expr = visitCloneReadonly(annAttachmentNode.expr, annAttachmentNode.expr.type);
-//        }
+        if (annAttachmentNode.expr != null) {
+            for (AttachPoint point : annAttachmentNode.annotationSymbol.points) {
+                if (!point.source) {
+                    annAttachmentNode.expr = visitCloneReadonly(annAttachmentNode.expr, annAttachmentNode.expr.type);
+                    break;
+                }
+            }
+        }
         result = annAttachmentNode;
     }
 
@@ -1729,18 +1734,24 @@ public class Desugar extends BLangNodeVisitor {
         }
 
         if (parentErrorVariable.cause != null) {
+            parentErrorVariable.cause.expr = generateErrorCauseLanglibFunction(parentErrorVariable.cause.pos,
+                    parentErrorVariable.cause.type, convertedErrorVarSymbol, null);
             BLangVariable errorCause = parentErrorVariable.cause;
+
             if (errorCause.getKind() == NodeKind.ERROR_VARIABLE) {
                 BLangErrorVariableDef errorVarDef = createErrorVariableDef(errorCause.pos,
                         (BLangErrorVariable) errorCause);
-                parentBlockStmt.addStatement(errorVarDef);
+                BLangNode blockStatementNode = rewrite(errorVarDef, env);
+                List<BLangStatement> statements = ((BLangBlockStmt) blockStatementNode).stmts;
+
+                for (BLangStatement statement : statements) {
+                    parentBlockStmt.addStatement(statement);
+                }
             } else {
                 BLangSimpleVariableDef causeVariableDef =
                         ASTBuilderUtil.createVariableDefStmt(parentErrorVariable.cause.pos, parentBlockStmt);
                 causeVariableDef.var = (BLangSimpleVariable) parentErrorVariable.cause;
             }
-            parentErrorVariable.cause.expr = generateErrorCauseLanglibFunction(parentErrorVariable.cause.pos,
-                    parentErrorVariable.cause.type, convertedErrorVarSymbol, null);
         }
 
         if ((parentErrorVariable.detail == null || parentErrorVariable.detail.isEmpty())
