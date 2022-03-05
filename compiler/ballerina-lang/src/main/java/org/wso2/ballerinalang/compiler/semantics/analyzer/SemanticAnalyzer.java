@@ -457,6 +457,7 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
             });
             validateAnnotationAttachmentCount(funcNode.annAttachments);
         }
+        funcNode.symbol.annAttachments.addAll(getAnnotationAttachmentSymbols(funcNode.annAttachments));
 
         BLangType returnTypeNode = funcNode.returnTypeNode;
         boolean hasReturnType = returnTypeNode != null;
@@ -466,6 +467,8 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
                 this.analyzeDef(annotationAttachment, funcEnv);
             });
             validateAnnotationAttachmentCount(funcNode.returnTypeAnnAttachments);
+            ((BInvokableTypeSymbol) funcNode.symbol.type.tsymbol).returnTypeAnnots.addAll(
+                    getAnnotationAttachmentSymbols(funcNode.returnTypeAnnAttachments));
         }
 
         boolean inIsolatedFunction = funcNode.flagSet.contains(Flag.ISOLATED);
@@ -509,10 +512,6 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
         if (funcNode.anonForkName != null) {
             funcNode.symbol.enclForkName = funcNode.anonForkName;
         }
-
-        funcNode.symbol.annAttachments.addAll(getAnnotationAttachmentSymbols(funcNode.annAttachments));
-        ((BInvokableTypeSymbol) funcNode.symbol.type.tsymbol).returnTypeAnnots.addAll(
-                getAnnotationAttachmentSymbols(funcNode.returnTypeAnnAttachments));
     }
 
     @Override
@@ -596,8 +595,7 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
 
         BSymbol typeDefSym = typeDefinition.symbol;
         if (typeDefSym != null && typeDefSym.kind == SymbolKind.TYPE_DEF) {
-            ((BTypeDefinitionSymbol) typeDefSym).annAttachments.addAll(
-                    getAnnotationAttachmentSymbols(typeDefinition.annAttachments));
+            ((BTypeDefinitionSymbol) typeDefSym).annAttachments.addAll(annotSymbols);
         }
 
         if (typeDefinition.flagSet.contains(Flag.ENUM)) {
@@ -1325,9 +1323,12 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
             return;
         }
 
+        BVarSymbol symbol = varNode.symbol;
+
         varNode.annAttachments.forEach(annotationAttachment -> {
             annotationAttachment.attachPoints.add(AttachPoint.Point.VAR);
             annotationAttachment.accept(this);
+            symbol.addAnnotation(annotationAttachment.annotationAttachmentSymbol);
         });
 
         validateAnnotationAttachmentCount(varNode.annAttachments);
@@ -1370,9 +1371,11 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
             return;
         }
 
+        BVarSymbol symbol = varNode.symbol;
         varNode.annAttachments.forEach(annotationAttachment -> {
             annotationAttachment.attachPoints.add(AttachPoint.Point.VAR);
             annotationAttachment.accept(this);
+            symbol.addAnnotation(annotationAttachment.annotationAttachmentSymbol);
         });
 
         validateAnnotationAttachmentCount(varNode.annAttachments);
@@ -1542,9 +1545,11 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
             return;
         }
 
+        BVarSymbol symbol = varNode.symbol;
         varNode.annAttachments.forEach(annotationAttachment -> {
             annotationAttachment.attachPoints.add(AttachPoint.Point.VAR);
             annotationAttachment.accept(this);
+            symbol.addAnnotation(annotationAttachment.annotationAttachmentSymbol);
         });
 
         validateAnnotationAttachmentCount(varNode.annAttachments);
@@ -1679,9 +1684,11 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
                     tupleVariable.setBType(symTable.semanticError);
                     return;
                 }
+                BVarSymbol tupleVarSymbol = tupleVariable.symbol;
                 tupleVariable.annAttachments.forEach(annotationAttachment -> {
                     annotationAttachment.attachPoints.add(AttachPoint.Point.VAR);
                     annotationAttachment.accept(this);
+                    tupleVarSymbol.addAnnotation(annotationAttachment.annotationAttachmentSymbol);
                 });
 
                 validateAnnotationAttachmentCount(tupleVariable.annAttachments);
@@ -1705,9 +1712,11 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
                     recordVariable.setBType(symTable.semanticError);
                 }
 
+                BVarSymbol recordVarSymbol = recordVariable.symbol;
                 recordVariable.annAttachments.forEach(annotationAttachment -> {
                     annotationAttachment.attachPoints.add(AttachPoint.Point.VAR);
                     annotationAttachment.accept(this);
+                    recordVarSymbol.addAnnotation(annotationAttachment.annotationAttachmentSymbol);
                 });
 
                 validateAnnotationAttachmentCount(recordVariable.annAttachments);
@@ -1734,9 +1743,11 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
                     return;
                 }
 
+                BVarSymbol errorVarSymbol = errorVariable.symbol;
                 errorVariable.annAttachments.forEach(annotationAttachment -> {
                     annotationAttachment.attachPoints.add(AttachPoint.Point.VAR);
                     annotationAttachment.accept(this);
+                    errorVarSymbol.addAnnotation(annotationAttachment.annotationAttachmentSymbol);
                 });
 
                 validateAnnotationAttachmentCount(errorVariable.annAttachments);
@@ -4672,6 +4683,7 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
         prevEnvs.push(env);
     }
 
+    // TODO: 2022-03-05 check if this can be replaced to access info via annot attchments from the symbol 
     private void validateIsolatedParamUsage(boolean inIsolatedFunction, BLangSimpleVariable variable,
                                             boolean isRestParam) {
         if (!hasAnnotation(variable.annAttachments, Names.ANNOTATION_ISOLATED_PARAM.value)) {
